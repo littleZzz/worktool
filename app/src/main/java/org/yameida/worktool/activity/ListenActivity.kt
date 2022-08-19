@@ -54,12 +54,18 @@ class ListenActivity : AppCompatActivity() {
         }
         sw_encrypt.isChecked = Constant.encryptType == 1
         sw_encrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            ToastUtils.showShort("此功能暂不可用")
+            sw_encrypt.isChecked=false
+            return@OnCheckedChangeListener
             LogUtils.i("sw_encrypt onCheckedChanged: $isChecked")
             Constant.encryptType = if (isChecked) 1 else 0
             SPUtils.getInstance().put("encryptType", Constant.encryptType)
         })
         sw_auto_reply.isChecked = Constant.autoReply == 1
         sw_auto_reply.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+            ToastUtils.showShort("此功能暂不可用")
+            sw_auto_reply.isChecked=false
+            return@OnCheckedChangeListener
             LogUtils.i("sw_auto_reply onCheckedChanged: $isChecked")
             Constant.autoReply = if (isChecked) 1 else 0
             SPUtils.getInstance().put("autoReply", Constant.autoReply)
