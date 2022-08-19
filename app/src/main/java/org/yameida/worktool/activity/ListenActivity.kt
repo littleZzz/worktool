@@ -29,7 +29,7 @@ class ListenActivity : AppCompatActivity() {
 
         initView()
         initAccessibility()
-        UpdateUtil.checkUpdate()
+        /*UpdateUtil.checkUpdate()//9098*/
         PermissionUtils.permission("android.permission.READ_EXTERNAL_STORAGE").request()
     }
 
@@ -152,6 +152,7 @@ class ListenActivity : AppCompatActivity() {
                     WeworkService::class.java,
                     sw_accessibility
                 )
+                if (isAccessibilitySettingOn()) return@OnClickListener
                 val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                 startActivity(intent)
             }
