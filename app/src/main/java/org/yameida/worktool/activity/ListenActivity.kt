@@ -24,7 +24,7 @@ class ListenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        title = "WorkTool"
+        title = "海握机器人"
         setContentView(R.layout.activity_listen)
 
         initView()
@@ -63,9 +63,6 @@ class ListenActivity : AppCompatActivity() {
         })
         sw_auto_reply.isChecked = Constant.autoReply == 1
         sw_auto_reply.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
-            ToastUtils.showShort("此功能暂不可用")
-            sw_auto_reply.isChecked=false
-            return@OnCheckedChangeListener
             LogUtils.i("sw_auto_reply onCheckedChanged: $isChecked")
             Constant.autoReply = if (isChecked) 1 else 0
             SPUtils.getInstance().put("autoReply", Constant.autoReply)
@@ -99,7 +96,7 @@ class ListenActivity : AppCompatActivity() {
             if (isChecked) {
                 if (SPUtils.getInstance().getString(WebConfig.LISTEN_CHANNEL_ID).isNullOrBlank()) {
                     sw_accessibility.isChecked = false
-                    ToastUtils.showLong("请先填写并保存链接号~")
+                    ToastUtils.showLong("请先填写并保存链接号id~")
                 } else if (!isAccessibilitySettingOn()) {
                     openAccessibility()
                 }
