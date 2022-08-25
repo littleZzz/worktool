@@ -27,9 +27,12 @@ import java.lang.Exception
 class WeworkService : AccessibilityService() {
     private val TAG = "WeworkService"
     lateinit var webSocketManager: WebSocketManager
+    lateinit var mForegroundNF: ForegroundNF//前台通知
 
     override fun onServiceConnected() {
         LogUtils.i("初始化成功")
+        mForegroundNF = ForegroundNF(this)
+        mForegroundNF.startForegroundNotification()
         //隐藏软键盘模式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             softKeyboardController.showMode = SHOW_MODE_HIDDEN
@@ -78,6 +81,7 @@ class WeworkService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         LogUtils.i("onDestroy")
+        mForegroundNF.stopForegroundNotification()
         //隐藏软键盘模式
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             softKeyboardController.showMode = SHOW_MODE_AUTO
