@@ -17,5 +17,5 @@ object Constant {
     var iv = "0123456789abcdef".toByteArray()
     val transformation = "AES/CBC/PKCS7Padding"
     var encryptType = SPUtils.getInstance().getInt("encryptType", 0)
-    var autoReply = SPUtils.getInstance().getInt("autoReply", 0)
+    var autoReply = SPUtils.getInstance().getInt("autoReply", 1)
 }
