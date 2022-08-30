@@ -1,8 +1,12 @@
 package org.yameida.worktool.activity
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils.SimpleStringSplitter
 import android.view.WindowManager
@@ -30,6 +34,11 @@ class ListenActivity : AppCompatActivity() {
         initView()
         initAccessibility()
         /*UpdateUtil.checkUpdate()//9098*/
+        //启动忽略电池优化，会弹出一个系统的弹框，我们在上面的
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        intent.data = Uri.parse("package:$packageName")
+        startActivity(intent)
+        //申请权限
         PermissionUtils.permission("android.permission.READ_EXTERNAL_STORAGE").request()
     }
 
@@ -196,5 +205,18 @@ class ListenActivity : AppCompatActivity() {
             }
         }
     }
+
+    /**
+     * 启动电池优化
+     */
+    fun Context.queryBatteryOptimizeStatus(): Boolean {
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            powerManager?.isIgnoringBatteryOptimizations(packageName) ?: false
+        } else {
+            true
+        }
+    }
+
 
 }
