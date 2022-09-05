@@ -70,7 +70,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/setting_vertical_padding"
-                        android:text="其他注意事项：设置屏幕常亮如30分钟（必选）；关闭企微自动打卡功能(必选)；关闭手机应用市场自动更新功能（必选）；开启手机自启动权限（可选）"
+                        android:text="其他注意事项：设置屏幕常亮如30分钟（必选）；关闭企微自动打卡功能(必选)；关闭手机应用市场自动更新功能（必选）；开启手机自启动权限（可选）;开启手机护眼模式（可选）"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
 
