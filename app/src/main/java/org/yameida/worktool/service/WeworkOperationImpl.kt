@@ -45,6 +45,7 @@ object WeworkOperationImpl {
      * @param originalContent 原始消息的内容
      * @param textType 原始消息的消息类型
      * @param receivedContent 回复内容
+     * @param prefix 回复内容前缀
      * @see WeworkMessageBean.TEXT_TYPE
      */
     fun replyMessage(
@@ -52,11 +53,13 @@ object WeworkOperationImpl {
         receivedName: String?,
         originalContent: String,
         textType: Int,
-        receivedContent: String
+        receivedContent: String,
+        prefix: String = "[自动回复]"
     ): Boolean {
         for (title in titleList) {
             if (WeworkRoomUtil.intoRoom(title)) {
                 if (WeworkTextUtil.longClickMessageItem(
+                        //聊天消息列表 1ListView 0RecycleView xViewGroup
                         AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView),
                         textType,
                         receivedName,
@@ -65,7 +68,7 @@ object WeworkOperationImpl {
                     )
                 ) {
                     LogUtils.v("开始回复")
-                    sendChatMessage(receivedContent, "[自动回复]")
+                    sendChatMessage(receivedContent, prefix)
                     LogUtils.d("$title: 回复成功")
                     WeworkLoopImpl.getChatMessageList()
                     return true
@@ -73,9 +76,9 @@ object WeworkOperationImpl {
                     LogUtils.d("$title: 回复失败 直接发送答案")
                     error("$title: 回复失败 直接发送答案 $receivedContent")
                     if (receivedName == null) {
-                        sendChatMessage(receivedContent, "[自动回复]【$originalContent】\n")
+                        sendChatMessage(receivedContent, "$prefix【$originalContent】\n")
                     } else {
-                        sendChatMessage(receivedContent, "[自动回复]【$originalContent】@$receivedName\n")
+                        sendChatMessage(receivedContent, "$prefix【$originalContent】@$receivedName\n")
                     }
                     WeworkLoopImpl.getChatMessageList()
                 }
@@ -108,6 +111,7 @@ object WeworkOperationImpl {
         for (title in titleList) {
             if (WeworkRoomUtil.intoRoom(title)) {
                 if (WeworkTextUtil.longClickMessageItem(
+                        //聊天消息列表 1ListView 0RecycleView xViewGroup
                         AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView),
                         textType,
                         receivedName,
@@ -167,63 +171,6 @@ object WeworkOperationImpl {
         return true
     }
 
-    fun getGroupQrcode(groupName: String): Boolean {
-        if (WeworkRoomUtil.intoRoom(groupName) && WeworkRoomUtil.intoGroupManager()) {
-            val tvList = AccessibilityUtil.findAllOnceByClazz(getRoot(), Views.TextView)
-            tvList.forEachIndexed { index, tv ->
-                if (tv.text != null && tv.text.contains("微信用户创建")) {
-                    if (index + 1 < tvList.size) {
-                        val tvQr = tvList[index + 1]
-                        AccessibilityUtil.performClick(tvQr)
-                    }
-                }
-            }
-            AccessibilityUtil.findOneByText(getRoot(), "保存到相册")
-            val startTime = System.currentTimeMillis()
-            var currentTime = startTime
-            while (currentTime - startTime <= Constant.CHANGE_PAGE_INTERVAL * 5) {
-                AccessibilityUtil.findOnceByClazz(getRoot(), Views.ProgressBar) ?: break
-                sleep(Constant.POP_WINDOW_INTERVAL / 5)
-                currentTime = System.currentTimeMillis()
-            }
-            if (AccessibilityUtil.findTextAndClick(getRoot(), "保存到相册")) {
-                sleep(Constant.CHANGE_PAGE_INTERVAL)
-                val fileDirPath = "/storage/emulated/0/DCIM/WeixinWork"
-                val fileDir = FileUtils.getFileByPath(fileDirPath)
-                if (fileDir.isDirectory) {
-                    for (file in fileDir.listFiles().filter { it.name.endsWith(".jpg") }) {
-                        val fileTime = file.name.replace("mmexport", "")
-                            .replace(".jpg", "")
-                        LogUtils.v("fileTime: $fileTime")
-                        if (fileTime.isNotBlank()) {
-                            if (fileTime.toLong() > currentTime) {
-                                LogUtils.d("找到最新保存二维码图片: $fileTime")
-                                try {
-                                    val bitmap = ImageUtils.bytes2Bitmap(file.readBytes())
-                                    val mDecoder = QRCodeDecoder.Builder().build()
-                                    val qrcode = mDecoder.decode(bitmap)
-                                    LogUtils.e("group: $groupName qrcode: $qrcode")
-                                    val weworkMessageBean = WeworkMessageBean()
-                                    weworkMessageBean.type = WeworkMessageBean.GET_GROUP_QRCODE
-                                    weworkMessageBean.groupName = groupName
-                                    weworkMessageBean.qrcode = qrcode
-                                    WeworkController.weworkService.webSocketManager.send(
-                                        weworkMessageBean
-                                    )
-                                    return true
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                    LogUtils.e(e)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false
-    }
-
     /**
      * 进入群聊并修改群配置
      * 群名称、群公告、拉人、踢人
@@ -278,7 +225,7 @@ object WeworkOperationImpl {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 AccessibilityUtil.performClick(node)
                 sleep(Constant.POP_WINDOW_INTERVAL)
-                if (AccessibilityUtil.findOnceByText(getRoot(), "微盘") != null) {
+                if (AccessibilityUtil.findOnceByText(getRoot(), "微盘", exact = true) != null) {
                     AccessibilityUtil.clickByNode(WeworkController.weworkService, node)
                 }
             } else {
@@ -328,7 +275,7 @@ object WeworkOperationImpl {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 AccessibilityUtil.performClick(node)
                 sleep(Constant.POP_WINDOW_INTERVAL)
-                if (AccessibilityUtil.findOnceByText(getRoot(), "微盘") != null) {
+                if (AccessibilityUtil.findOnceByText(getRoot(), "微盘", exact = true) != null) {
                     AccessibilityUtil.clickByNode(WeworkController.weworkService, node)
                 }
             } else {
@@ -443,7 +390,7 @@ object WeworkOperationImpl {
         friend: WeworkMessageBean.Friend
     ): Boolean {
         goHome()
-        val list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
+        val list = AccessibilityUtil.findOneByClazz(getRoot(), Views.RecyclerView, Views.ListView, Views.ViewGroup)
         if (list != null) {
             val frontNode = AccessibilityUtil.findFrontNode(list)
             val textViewList = AccessibilityUtil.findAllOnceByClazz(frontNode, Views.TextView)
@@ -452,9 +399,19 @@ object WeworkOperationImpl {
                 val multiButton: AccessibilityNodeInfo = textViewList[textViewList.size - 1]
                 AccessibilityUtil.performClick(multiButton)
                 sleep(Constant.POP_WINDOW_INTERVAL)
-                val listViewList = AccessibilityUtil.findAllByClazz(getRoot(), Views.ListView)
-                if (!listViewList.isNullOrEmpty()) {
-                    if (AccessibilityUtil.findTextAndClick(listViewList.last(), "添加客户", "添加居民", "加微信")) {
+                val list = AccessibilityUtil.findAllByClazz(getRoot(), Views.ListView).lastOrNull()
+                if (list != null) {
+                    val button = AccessibilityUtil.findOneByText(list, "添加客户", "添加居民", "加微信")
+                    if (button != null) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            AccessibilityUtil.performClick(button)
+                            sleep(Constant.POP_WINDOW_INTERVAL)
+                            if (AccessibilityUtil.findOnceByText(list, "添加客户", "添加居民", "加微信", exact = true) != null) {
+                                AccessibilityUtil.clickByNode(WeworkController.weworkService, button)
+                            }
+                        } else {
+                            AccessibilityUtil.performClick(button)
+                        }
                         AccessibilityUtil.findTextAndClick(getRoot(), "搜索手机号添加")
                         AccessibilityUtil.findTextInput(getRoot(), friend.phone.trim())
                         if (AccessibilityUtil.findTextAndClick(getRoot(), "网络查找手机")) {
@@ -469,12 +426,12 @@ object WeworkOperationImpl {
                                 )
                             }
                             if (AccessibilityUtil.findOneByText(getRoot(), "标签", "电话") != null) {
-                                var markTv = AccessibilityUtil.findOnceByText(getRoot(), "设置备注和描述")
+                                var markTv = AccessibilityUtil.findOnceByText(getRoot(), "设置备注和描述", exact = true)
                                 if (markTv == null) {
-                                    markTv = AccessibilityUtil.findOnceByText(getRoot(), "企业")
+                                    markTv = AccessibilityUtil.findOnceByText(getRoot(), "企业", exact = true)
                                 }
                                 if (markTv == null) {
-                                    markTv = AccessibilityUtil.findOnceByText(getRoot(), "描述")
+                                    markTv = AccessibilityUtil.findOnceByText(getRoot(), "描述", exact = true)
                                 }
                                 //设置备注
                                 if (markTv != null && (friend.markName != null
@@ -523,7 +480,7 @@ object WeworkOperationImpl {
                                         LogUtils.d("发送添加邀请成功: " + friend.phone)
                                     }
                                 } else {
-                                    if (AccessibilityUtil.findOnceByText(getRoot(), "发消息") != null) {
+                                    if (AccessibilityUtil.findOnceByText(getRoot(), "发消息", exact = true) != null) {
                                         LogUtils.e("已经添加联系人，请勿重复添加")
                                     } else {
                                         LogUtils.e("未找到添加为联系人")
@@ -585,6 +542,7 @@ object WeworkOperationImpl {
      * extraText 转发是否附加一条文本
      */
     private fun relaySelectTarget(selectList: List<String>, extraText: String? = null): Boolean {
+        //聊天消息列表 1ListView 0RecycleView xViewGroup
         val list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
         if (list != null) {
             val frontNode = AccessibilityUtil.findFrontNode(list, 2)
@@ -645,7 +603,7 @@ object WeworkOperationImpl {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 AccessibilityUtil.performClick(node)
                 sleep(Constant.POP_WINDOW_INTERVAL)
-                if (AccessibilityUtil.findOnceByText(getRoot(), "客户群", "居民群") != null) {
+                if (AccessibilityUtil.findOnceByText(getRoot(), "客户群", "居民群", exact = true) != null) {
                     if (AccessibilityUtil.clickByNode(WeworkController.weworkService, node)) {
                         LogUtils.d("进入客户群应用")
                         val textView =
@@ -730,6 +688,7 @@ object WeworkOperationImpl {
                 LogUtils.e("未找到添加成员按钮")
                 return false
             }
+            //群详情列表
             val list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
             if (list != null) {
                 val frontNode = AccessibilityUtil.findFrontNode(list, 2)
@@ -797,6 +756,7 @@ object WeworkOperationImpl {
                 LogUtils.e("未找到删除成员按钮")
                 return false
             }
+            //群详情列表
             val list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
             if (list != null) {
                 val frontNode = AccessibilityUtil.findFrontNode(list, 2)
@@ -845,7 +805,7 @@ object WeworkOperationImpl {
     private fun groupChangeAnnouncement(groupAnnouncement: String? = null): Boolean {
         if (groupAnnouncement == null) return true
         if (WeworkRoomUtil.intoGroupManager()) {
-            val textView = AccessibilityUtil.findOneByText(getRoot(), "群公告")
+            val textView = AccessibilityUtil.findOneByText(getRoot(), "群公告", exact = true)
             if (textView != null) {
                 AccessibilityUtil.performClick(textView)
                 val editButton = AccessibilityUtil.findOneByText(getRoot(), "编辑", timeout = 2000, exact = true)
@@ -888,10 +848,14 @@ object WeworkOperationImpl {
      * 发送消息+@at
      */
     private fun sendChatMessage(text: String, prefix: String = "", at: String? = null) {
+        val voiceFlag = AccessibilityUtil.findOnceByText(getRoot(), "按住 说话", "按住说话", exact = true)
+        if (voiceFlag != null) {
+            AccessibilityUtil.performClickWithSon(AccessibilityUtil.findFrontNode(voiceFlag))
+        }
         var atFailed = false
         if (!at.isNullOrEmpty()) {
             AccessibilityUtil.findTextInput(getRoot(), "@")
-            val atFlag = AccessibilityUtil.findOneByText(getRoot(), "选择提醒的人", timeout = 2000)
+            val atFlag = AccessibilityUtil.findOneByText(getRoot(), "选择提醒的人", timeout = 2000, exact = true)
             if (atFlag != null) {
                 val rv = AccessibilityUtil.findOneByClazz(getRoot(), Views.RecyclerView)
                 if (rv != null) {
@@ -926,7 +890,8 @@ object WeworkOperationImpl {
             }
         }
         val content = if (atFailed) "@$at $prefix$text" else "$prefix$text"
-        if (AccessibilityUtil.findTextInput(getRoot(), content, append = !atFailed)) {
+        val append = !at.isNullOrEmpty() && !atFailed
+        if (AccessibilityUtil.findTextInput(getRoot(), content, append = append)) {
             val sendButton = AccessibilityUtil.findAllByClazz(getRoot(), Views.Button)
                 .firstOrNull { it.text == "发送" }
             if (sendButton != null) {
@@ -993,10 +958,73 @@ object WeworkOperationImpl {
                 list.refresh()
             }
             if (AccessibilityUtil.findTextAndClick(getRoot(), "确定")) {
+                sleep(Constant.POP_WINDOW_INTERVAL)
+                //可能有两次确定 另一次为添加新tag
+                AccessibilityUtil.findTextAndClick(getRoot(), "确定")
                 return true
             }
         }
         LogUtils.e("未找到个人标签")
+        return false
+    }
+
+    /**
+     * 获取群二维码并上传后台
+     */
+    fun getGroupQrcode(groupName: String): Boolean {
+        if (WeworkRoomUtil.intoRoom(groupName) && WeworkRoomUtil.intoGroupManager()) {
+            val tvList = AccessibilityUtil.findAllOnceByClazz(getRoot(), Views.TextView)
+            tvList.forEachIndexed { index, tv ->
+                if (tv.text != null && tv.text.contains("微信用户创建")) {
+                    if (index + 1 < tvList.size) {
+                        val tvQr = tvList[index + 1]
+                        AccessibilityUtil.performClick(tvQr)
+                    }
+                }
+            }
+            AccessibilityUtil.findOneByText(getRoot(), "保存到相册")
+            val startTime = System.currentTimeMillis()
+            var currentTime = startTime
+            while (currentTime - startTime <= Constant.CHANGE_PAGE_INTERVAL * 5) {
+                AccessibilityUtil.findOnceByClazz(getRoot(), Views.ProgressBar) ?: break
+                sleep(Constant.POP_WINDOW_INTERVAL / 5)
+                currentTime = System.currentTimeMillis()
+            }
+            if (AccessibilityUtil.findTextAndClick(getRoot(), "保存到相册")) {
+                sleep(Constant.CHANGE_PAGE_INTERVAL)
+                val fileDirPath = "/storage/emulated/0/DCIM/WeixinWork"
+                val fileDir = FileUtils.getFileByPath(fileDirPath)
+                if (fileDir.isDirectory) {
+                    for (file in fileDir.listFiles().filter { it.name.endsWith(".jpg") }) {
+                        val fileTime = file.name.replace("mmexport", "")
+                            .replace(".jpg", "")
+                        LogUtils.v("fileTime: $fileTime")
+                        if (fileTime.isNotBlank()) {
+                            if (fileTime.toLong() > currentTime) {
+                                LogUtils.d("找到最新保存二维码图片: $fileTime")
+                                try {
+                                    val bitmap = ImageUtils.bytes2Bitmap(file.readBytes())
+                                    val mDecoder = QRCodeDecoder.Builder().build()
+                                    val qrcode = mDecoder.decode(bitmap)
+                                    LogUtils.e("group: $groupName qrcode: $qrcode")
+                                    val weworkMessageBean = WeworkMessageBean()
+                                    weworkMessageBean.type = WeworkMessageBean.GET_GROUP_QRCODE
+                                    weworkMessageBean.groupName = groupName
+                                    weworkMessageBean.qrcode = qrcode
+                                    WeworkController.weworkService.webSocketManager.send(
+                                        weworkMessageBean
+                                    )
+                                    return true
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    LogUtils.e(e)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return false
     }
 
