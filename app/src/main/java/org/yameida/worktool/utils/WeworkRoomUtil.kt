@@ -105,7 +105,8 @@ object WeworkRoomUtil {
                 sleep(Constant.CHANGE_PAGE_INTERVAL)
                 //消息页搜索结果列表
                 val selectListView = findOneByClazz(getRoot(), Views.ListView)
-                val imageView = AccessibilityUtil.findOnceByClazz(selectListView, Views.ImageView)
+                var imageView= AccessibilityUtil.findOnceByText(selectListView, title, exact = true)
+//                val imageView = AccessibilityUtil.findOnceByClazz(selectListView, Views.ImageView)
                 if (imageView != null) {
                     AccessibilityUtil.performClick(imageView)
                     LogUtils.d("进入房间: $title")
