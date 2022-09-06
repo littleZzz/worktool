@@ -184,6 +184,7 @@ object AccessibilityUtil {
             }
             nodeInfo = nodeInfo.parent
         }
+        LogUtils.e("performClick failed! ${nodeInfo?.className}")
         return false
     }
 
@@ -397,7 +398,6 @@ object AccessibilityUtil {
         var currentTime = startTime
         while (currentTime - startTime <= timeout) {
             val result = findOnceByText(node, *textList, exact = exact)
-            LogUtils.v("text: ${textList.joinToString()} result == null: ${result == null}")
             if (result != null) return result
             sleep(SHORT_INTERVAL)
             if (root) {
@@ -423,7 +423,7 @@ object AccessibilityUtil {
         else if (textNodeList.size > 0) {
             for (textNode in textNodeList) {
                 for (text in textList) {
-                    if (textNode.text == text) {
+                    if (textNode.text?.toString() == text) {
                         return textNode
                     }
                 }
@@ -479,7 +479,7 @@ object AccessibilityUtil {
         list: ArrayList<AccessibilityNodeInfo> = ArrayList()
     ): ArrayList<AccessibilityNodeInfo> {
         if (node == null) return list
-        val nodeText = node.text
+        val nodeText = node.text?.toString()
         if (nodeText != null) {
             for (text in textList) {
                 if (exact && nodeText == text) {
