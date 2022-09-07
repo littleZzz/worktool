@@ -106,40 +106,26 @@ object WeworkLoopImpl {
             LogUtils.v("聊天: $title")
             log("聊天: $title")
             //聊天消息列表 1ListView 0RecycleView xViewGroup
-            var list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
+            val list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
             if (list != null) {
-                val isHaveNewReg = AccessibilityUtil.findTextAndClick(getRoot(), "条新消息")
-                if (isHaveNewReg) sleep(1000)
-
-                var messageList: List<WeworkMessageBean.SubMessageBean>
-                while (true) {
-                    list = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)
-                    LogUtils.v("消息条数: " + list!!.childCount)
-                    messageList = arrayListOf<WeworkMessageBean.SubMessageBean>()
-                    for (i in 0 until list.childCount) {
-                        val item = list.getChild(i)
-                        if (item != null && item.childCount > 0) {
-                            messageList.add(parseChatMessageItem(item, roomType))
-                        }
+                LogUtils.v("消息条数: " + list.childCount)
+                val messageList = arrayListOf<WeworkMessageBean.SubMessageBean>()
+                for (i in 0 until list.childCount) {
+                    val item = list.getChild(i)
+                    if (item != null && item.childCount > 0) {
+                        messageList.add(parseChatMessageItem(item, roomType))
                     }
-                    WeworkController.weworkService.webSocketManager.send(
-                        WeworkMessageBean(
-                            null, null,
-                            WeworkMessageBean.TYPE_RECEIVE_MESSAGE_LIST,
-                            roomType,
-                            titleList,
-                            messageList,
-                            null
-                        )
-                    )
-
-                    val a = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)?.getChild(0)
-                    AccessibilityUtil.performScrollDown(getRoot(), 0)
-                    sleep(500)
-                    val b = AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView)?.getChild(0)
-                    if (a == b) break
                 }
-
+                WeworkController.weworkService.webSocketManager.send(
+                    WeworkMessageBean(
+                        null, null,
+                        WeworkMessageBean.TYPE_RECEIVE_MESSAGE_LIST,
+                        roomType,
+                        titleList,
+                        messageList,
+                        null
+                    )
+                )
                 val lastMessage = messageList.lastOrNull { it.sender == 0 }
                 if (lastMessage != null) {
                     var tempContent = ""
