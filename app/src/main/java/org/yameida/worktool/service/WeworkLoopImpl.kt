@@ -218,6 +218,7 @@ object WeworkLoopImpl {
                         AccessibilityUtil.clickByNode(WeworkController.weworkService, item)
                         sleep(100)
                         AccessibilityUtil.clickByNode(WeworkController.weworkService, item)
+                        sleep(Constant.CHANGE_PAGE_INTERVAL)//等待双击后列表更新
                     }
                 }
             }
