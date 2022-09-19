@@ -26,7 +26,8 @@ object WeworkLoopImpl {
         try {
             while (mainLoopRunning) {
                 if (WeworkRoomUtil.getRoomType(false) != WeworkMessageBean.ROOM_TYPE_UNKNOWN
-                    && getChatMessageList()) {
+                    && getChatMessageList(isFromLoop = true)
+                ) {
                 }
                 if (!mainLoopRunning) break
                 goHomeTab("消息")
@@ -93,7 +94,7 @@ object WeworkLoopImpl {
      * 1.获取群名
      * 2.获取消息列表
      */
-    fun getChatMessageList(timeout: Long = 3000): Boolean {
+    fun getChatMessageList(timeout: Long = 3000, isFromLoop: Boolean = false): Boolean {
         if (Constant.autoReply == 0) return true
         AccessibilityUtil.performScrollDown(getRoot(), 0)
         val roomType = WeworkRoomUtil.getRoomType()
@@ -102,6 +103,12 @@ object WeworkLoopImpl {
             titleList = WeworkRoomUtil.getFriendName()
         }
         if (titleList.size > 0) {
+            val nowtype = WeworkRoomUtil.getRoomType(false) == WeworkMessageBean.ROOM_TYPE_EXTERNAL_GROUP
+            val endsWith = titleList[0].endsWith("…")
+            if (nowtype && isFromLoop &&endsWith ) {
+                WeworkGetImpl.getGroupInfo(arrayListOf())
+            }
+
             val title = titleList.joinToString()
             LogUtils.v("聊天: $title")
             log("聊天: $title")
