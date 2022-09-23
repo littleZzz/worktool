@@ -167,7 +167,7 @@ object WeworkOperationImpl {
                 || !groupChangeAnnouncement(groupAnnouncement)
             ) return false
         }
-        getGroupQrcode(groupName)
+//        getGroupQrcode(groupName)
         return true
     }
 
