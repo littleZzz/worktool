@@ -126,6 +126,9 @@ public class WeworkMessageBean {
     public static final int TEXT_TYPE_COLLECTION = 14;
     public static final int TEXT_TYPE_REPLY = 15;
 
+    //自加 用于同步记录存储一下listBean中的messageId
+    public String objMessageId="";
+
     //标题 通常是群名或联系人
     public List<String> titleList;
     //上传聊天列表

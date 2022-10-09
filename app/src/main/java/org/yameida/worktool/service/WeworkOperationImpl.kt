@@ -26,16 +26,18 @@ object WeworkOperationImpl {
      * @see WeworkMessageBean.TEXT_TYPE
      */
     fun sendMessage(titleList: List<String>, receivedContent: String, at: String? = null): Boolean {
+        var result = false
         for (title in titleList) {
             if (WeworkRoomUtil.intoRoom(title)) {
                 sendChatMessage(receivedContent, at = at)
+                result = true
                 LogUtils.d("$title: 发送成功")
             } else {
                 LogUtils.d("$title: 发送失败")
                 error("$title: 发送失败 $receivedContent")
             }
         }
-        return true
+        return result
     }
 
     /**
@@ -847,7 +849,8 @@ object WeworkOperationImpl {
     /**
      * 发送消息+@at
      */
-    private fun sendChatMessage(text: String, prefix: String = "", at: String? = null) {
+    private fun sendChatMessage(text: String, prefix: String = "", at: String? = null): Boolean {
+        var reslut = false
         val voiceFlag = AccessibilityUtil.findOnceByText(getRoot(), "按住 说话", "按住说话", exact = true)
         if (voiceFlag != null) {
             AccessibilityUtil.performClickWithSon(AccessibilityUtil.findFrontNode(voiceFlag))
@@ -898,6 +901,7 @@ object WeworkOperationImpl {
                 LogUtils.d("发送消息: \n$content")
                 log("发送消息: \n$content")
                 AccessibilityUtil.performClick(sendButton)
+                reslut = true
             } else {
                 LogUtils.e("未找到发送按钮")
                 error("未找到发送按钮")
@@ -906,6 +910,7 @@ object WeworkOperationImpl {
             LogUtils.e("未找到输入框")
             error("未找到输入框")
         }
+        return reslut
     }
 
     /**

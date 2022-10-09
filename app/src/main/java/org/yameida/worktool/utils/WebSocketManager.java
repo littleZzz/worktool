@@ -60,12 +60,13 @@ public class WebSocketManager {
      * @param messageId 保存在map中30秒后清除
      * @return true继续消费事件 false重复事件不需消息
      */
-    public synchronized boolean confirm(String messageId) {
+    public synchronized boolean confirm(String messageId, int type) {
         if (messageId == null || messageId.isEmpty()) return true;
-        send(new WeworkMessageListBean(messageId, WeworkMessageListBean.SOCKET_TYPE_MESSAGE_CONFIRM));
-        if (messageIdMap.containsKey(messageId)) return false;
+        if (type != WeworkMessageBean.SEND_MESSAGE && type != WeworkMessageBean.INIT_GROUP
+                && type != WeworkMessageBean.INTO_GROUP_AND_CONFIG)/*发送消息 群聊 更改为先操作后确认*/ {
+            send(new WeworkMessageListBean(messageId, WeworkMessageListBean.SOCKET_TYPE_MESSAGE_CONFIRM));
+        }
         long currentTimeMillis = System.currentTimeMillis();
-        messageIdMap.put(messageId, currentTimeMillis + 30 * 1000);
         for (Map.Entry<String, Long> entry : messageIdMap.entrySet()) {
             String key = entry.getKey();
             Long value = entry.getValue();
@@ -73,6 +74,8 @@ public class WebSocketManager {
                 messageIdMap.remove(key);
             }
         }
+        if (messageIdMap.containsKey(messageId)) return false;
+        messageIdMap.put(messageId, System.currentTimeMillis() + 8 * 1000);
         return true;
     }
 

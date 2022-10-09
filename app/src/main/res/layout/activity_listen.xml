@@ -46,7 +46,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="1.联系许航申请链接id后在下方填写并点击保存"
+                        android:text="1.申请链接id后在下方填写并点击保存"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
 

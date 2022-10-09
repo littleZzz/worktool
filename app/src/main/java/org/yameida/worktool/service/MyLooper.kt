@@ -12,7 +12,6 @@ import org.yameida.worktool.Constant
 import org.yameida.worktool.model.WeworkMessageBean
 import org.yameida.worktool.model.WeworkMessageListBean
 import java.nio.charset.StandardCharsets
-import java.util.LinkedHashSet
 import kotlin.concurrent.thread
 
 object MyLooper {
@@ -59,7 +58,9 @@ object MyLooper {
             return
         }
         if (messageList.socketType == WeworkMessageListBean.SOCKET_TYPE_MESSAGE_LIST) {
-            val confirm = WeworkController.weworkService.webSocketManager.confirm(messageList.messageId)
+            val confirm = WeworkController.weworkService.webSocketManager.confirm(
+                messageList.messageId, messageList.list.firstOrNull()?.type ?: -1
+            )
             if (!confirm) return
             if (messageList.encryptType == 1) {
                 val decryptHexStringAES = EncryptUtils.decryptHexStringAES(
@@ -76,6 +77,7 @@ object MyLooper {
             }
             //去重处理 丢弃之前的重复指令 丢弃之前的获取新消息指令
             for (message in LinkedHashSet(messageList.list)) {
+                message.objMessageId = messageList.messageId//每个obj对象也记录一下messageId
                 if (message.type == WeworkMessageBean.LOOP_RECEIVE_NEW_MESSAGE) {
                     WeworkController.enableLoopRunning = true
                 } else {
@@ -104,7 +106,8 @@ object MyLooper {
                 WeworkController.loopReceiveNewMessage()
             }
             WeworkMessageBean.SEND_MESSAGE -> {
-                WeworkController.sendMessage(message)
+                val result = WeworkController.sendMessage(message)
+                confirmCmd(result, message)
             }
             WeworkMessageBean.REPLY_MESSAGE -> {
                 WeworkController.replyMessage(message)
@@ -113,10 +116,12 @@ object MyLooper {
                 WeworkController.relayMessage(message)
             }
             WeworkMessageBean.INIT_GROUP -> {
-                WeworkController.initGroup(message)
+                val result = WeworkController.initGroup(message)
+                confirmCmd(result, message)
             }
             WeworkMessageBean.INTO_GROUP_AND_CONFIG -> {
-                WeworkController.intoGroupAndConfig(message)
+                val result = WeworkController.intoGroupAndConfig(message)
+                confirmCmd(result, message)
             }
             WeworkMessageBean.PUSH_MICRO_DISK_IMAGE -> {
                 WeworkController.pushMicroDiskImage(message)
@@ -150,6 +155,15 @@ object MyLooper {
             WeworkMessageBean.ROBOT_CONTROLLER_TEST -> {
                 WeworkController.test(message)
             }
+        }
+    }
+
+    private fun confirmCmd(result: Boolean, message: WeworkMessageBean) {
+        if (result) {
+            getInstance().removeMessages(message.type * message.hashCode())
+            WeworkController.weworkService.webSocketManager.send(
+                WeworkMessageListBean(message.objMessageId, WeworkMessageListBean.SOCKET_TYPE_MESSAGE_CONFIRM)
+            )
         }
     }
 }
