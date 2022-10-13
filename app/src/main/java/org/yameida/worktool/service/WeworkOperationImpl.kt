@@ -719,7 +719,7 @@ object WeworkOperationImpl {
                         AccessibilityUtil.findTextAndClick(getRoot(), "聊天记录")
                     }
                     val confirmButton =
-                        AccessibilityUtil.findOneByText(getRoot(), "确定(${selectList.size})")
+                        AccessibilityUtil.findOneByText(getRoot(), "确定(")//${selectList.size}) 不再精准匹配
                     if (confirmButton != null) {
                         AccessibilityUtil.performClick(confirmButton)
                     } else {
