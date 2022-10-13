@@ -99,7 +99,7 @@ object WeworkRoomUtil {
                 val searchButton: AccessibilityNodeInfo = textViewList[textViewList.size - 2]
                 val multiButton: AccessibilityNodeInfo = textViewList[textViewList.size - 1]
                 AccessibilityUtil.performClick(searchButton)
-                AccessibilityUtil.findTextInput(getRoot(), title.replace("…", "").replace("-.*$".toRegex(), ""))
+                AccessibilityUtil.findTextInput(getRoot(), title.replace("…", ""))
 //                sleep(Constant.CHANGE_PAGE_INTERVAL)
                 sleep(1300L)
                 //消息页搜索结果列表

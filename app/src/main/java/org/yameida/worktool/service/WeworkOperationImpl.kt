@@ -700,7 +700,7 @@ object WeworkOperationImpl {
                     for (select in selectList) {
                         AccessibilityUtil.performClick(multiButton)
                         AccessibilityUtil.findTextInput(getRoot(), select)
-                        sleep(Constant.POP_WINDOW_INTERVAL)
+                        sleep(Constant.CHANGE_PAGE_INTERVAL)
                         val selectListView =
                             AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView, Views.RecyclerView, Views.ViewGroup, minChildCount = 2)
                         if (selectListView != null) {
