@@ -315,6 +315,48 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/setting_start_padding"
                 android:paddingTop="@dimen/setting_vertical_padding"
+                android:paddingEnd="@dimen/setting_end_start_padding"
+                android:paddingBottom="@dimen/setting_vertical_padding">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/setting_start_padding"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/stop_to_home"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="暂停回到主页任务"
+                        android:textColor="@color/color_333333"
+                        android:textSize="@dimen/setting_start_font_size" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                    <Button
+                        android:id="@+id/start_to_home"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="开启回到主页任务"
+                        android:textColor="@color/color_333333"
+                        android:textSize="@dimen/setting_start_font_size" />
+
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/setting_start_padding"
+                android:paddingTop="@dimen/setting_vertical_padding"
                 android:paddingEnd="@dimen/setting_end_padding"
                 android:paddingBottom="@dimen/setting_vertical_padding">
 

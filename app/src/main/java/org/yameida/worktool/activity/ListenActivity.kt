@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils.SimpleStringSplitter
@@ -20,7 +21,12 @@ import kotlinx.android.synthetic.main.activity_listen.*
 import org.yameida.worktool.*
 import org.yameida.worktool.service.WeworkService
 import org.yameida.worktool.config.WebConfig
+import org.yameida.worktool.model.WeworkMessageBean
+import org.yameida.worktool.service.MyLooper
+import org.yameida.worktool.service.WeworkController
 import org.yameida.worktool.utils.UpdateUtil
+import java.util.*
+import kotlin.concurrent.timerTask
 
 class ListenActivity : AppCompatActivity() {
 
@@ -64,7 +70,7 @@ class ListenActivity : AppCompatActivity() {
         sw_encrypt.isChecked = Constant.encryptType == 1
         sw_encrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             ToastUtils.showShort("此功能暂不可用")
-            sw_encrypt.isChecked=false
+            sw_encrypt.isChecked = false
             return@OnCheckedChangeListener
             LogUtils.i("sw_encrypt onCheckedChanged: $isChecked")
             Constant.encryptType = if (isChecked) 1 else 0
@@ -76,8 +82,28 @@ class ListenActivity : AppCompatActivity() {
             Constant.autoReply = if (isChecked) 1 else 0
             SPUtils.getInstance().put("autoReply", Constant.autoReply)
         })
+        //暂停回到主页任务 用于调试使用
+        stop_to_home.setOnClickListener {
+            Timer().schedule(timerTask {
+                WeworkController.enableLoopRunning = false
+                WeworkController.mainLoopRunning = false
+                ToastUtils.showShort("关闭成功")
+            }, 5000)
+        }
+        start_to_home.setOnClickListener {
+            Timer().schedule(timerTask {
+                WeworkController.enableLoopRunning = true
+                MyLooper.getInstance().sendMessage(Message.obtain().apply {
+                    what = WeworkMessageBean.LOOP_RECEIVE_NEW_MESSAGE
+                    obj = WeworkMessageBean().apply { type = WeworkMessageBean.LOOP_RECEIVE_NEW_MESSAGE }
+                })
+                ToastUtils.showShort("开启成功")
+            }, 5000)
+        }
+
         tv_host.text = WebConfig.HOST
-        val version = "${AppUtils.getAppVersionName()}     Android ${DeviceUtils.getSDKVersionName()} ${DeviceUtils.getManufacturer()} ${DeviceUtils.getModel()}"
+        val version =
+            "${AppUtils.getAppVersionName()}     Android ${DeviceUtils.getSDKVersionName()} ${DeviceUtils.getManufacturer()} ${DeviceUtils.getModel()}"
         tv_version.text = version
         val workVersionName = AppUtils.getAppInfo(Constant.PACKAGE_NAMES)?.versionName
         when (workVersionName) {
