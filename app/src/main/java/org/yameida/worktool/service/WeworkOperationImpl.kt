@@ -160,17 +160,21 @@ object WeworkOperationImpl {
         selectList: List<String>?,
         groupAnnouncement: String?
     ): Boolean {
+        var reslut = false
         if (!WeworkRoomUtil.isGroupExists(groupName)) {
-            if (!createGroup() || !groupRename(groupName) || !groupAddMember(selectList)
-                || !groupChangeAnnouncement(groupAnnouncement)
-            ) return false
+            if (createGroup() && groupRename(groupName) && groupAddMember(selectList)
+                && groupChangeAnnouncement(groupAnnouncement)) {
+                reslut = true
+            }
         } else {
-            if (!groupRename(groupName) || !groupAddMember(selectList)
-                || !groupChangeAnnouncement(groupAnnouncement)
-            ) return false
+            groupRename(groupName)
+            groupAddMember(selectList)
+            if (groupChangeAnnouncement(groupAnnouncement)) {
+                reslut = true
+            }
         }
 //        getGroupQrcode(groupName)
-        return true
+        return reslut
     }
 
     /**
@@ -724,6 +728,9 @@ object WeworkOperationImpl {
                         AccessibilityUtil.performClick(confirmButton)
                     } else {
                         LogUtils.e("未发现确认按钮: ")
+                        backPress()
+                        sleep(Constant.CHANGE_PAGE_INTERVAL)
+                        backPress()
                         return false
                     }
                 } else {
@@ -842,6 +849,7 @@ object WeworkOperationImpl {
             }
         } else {
             LogUtils.e("进入群管理页失败")
+            return false
         }
         return true
     }
