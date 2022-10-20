@@ -46,6 +46,28 @@ object WeworkLoopImpl {
     }
 
     /**
+     * 检测是否需要启动企微
+     */
+    fun awakeQiWei(): Boolean {
+        var result = false
+        val tempRoot = WeworkController.weworkService.rootInActiveWindow
+        val root = WeworkController.weworkService.rootInActiveWindow
+        if (tempRoot != root) {
+            LogUtils.e("tempRoot != root")
+        } else if (root != null && root.packageName != Constant.PACKAGE_NAMES) {
+            LogUtils.e("当前不在企业微信: ${root.packageName}")
+            var a = AccessibilityUtil.findOneByText(root, "企业微信", exact = true)
+            var b = AccessibilityUtil.findOneByText(root, "海握机器人", exact = true)
+            var c = AccessibilityUtil.findOneByText(root, "文件管理", exact = true)
+            if (a != null && b != null && c != null) {
+                AccessibilityUtil.clickByNode(WeworkController.weworkService, a)
+                result=true
+            }
+        }
+        return result
+    }
+
+    /**
      * 读取通讯录好友请求
      */
     fun getFriendRequest(): Boolean {

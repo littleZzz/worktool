@@ -96,6 +96,7 @@ fun getRoot(ignoreCheck: Boolean): AccessibilityNodeInfo {
                 if (ignoreCheck) {
                     return root
                 }
+                if(WeworkLoopImpl.awakeQiWei())sleep(3500)
             }
         }
         sleep(1000)
