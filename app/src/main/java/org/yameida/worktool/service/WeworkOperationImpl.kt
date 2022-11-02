@@ -173,6 +173,7 @@ object WeworkOperationImpl {
                 reslut = true
             }
         }
+       if(reslut) groupTransferManager(groupName, selectList?.get(0))
 //        getGroupQrcode(groupName)
         return reslut
     }
@@ -979,6 +980,39 @@ object WeworkOperationImpl {
         }
         LogUtils.e("未找到个人标签")
         return false
+    }
+
+
+    /**
+     * 转让群主
+     */
+    fun groupTransferManager(groupName: String, newManagerName: String?): Boolean {
+        if (newManagerName == null) return true
+        try {
+            if (WeworkRoomUtil.intoGroupManager()) {
+                val tvList = AccessibilityUtil.findOnceByText(getRoot(), "群管理", exact = true)
+                if (tvList != null) {
+                    AccessibilityUtil.clickByNode(WeworkController.weworkService, tvList)
+                    sleep(Constant.CHANGE_PAGE_INTERVAL)
+                    val data = AccessibilityUtil.findOnceByText(getRoot(), "转让群主", exact = true)
+                    if (data != null) {
+                        AccessibilityUtil.clickByNode(WeworkController.weworkService, data)
+                        sleep(Constant.CHANGE_PAGE_INTERVAL)
+                        val manager = AccessibilityUtil.findOnceByText(getRoot(), newManagerName, exact = true)
+                        if (manager != null) {
+                            AccessibilityUtil.clickByNode(WeworkController.weworkService, manager)
+                            sleep(Constant.CHANGE_PAGE_INTERVAL)
+                            val confirm = AccessibilityUtil.findOnceByText(getRoot(), "确定", exact = true)
+                            if (confirm != null) {
+                                AccessibilityUtil.clickByNode(WeworkController.weworkService, confirm)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+        }
+        return true
     }
 
     /**
