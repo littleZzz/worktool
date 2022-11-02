@@ -173,7 +173,7 @@ object WeworkOperationImpl {
                 reslut = true
             }
         }
-       if(reslut) groupTransferManager(groupName, selectList?.get(0))
+       if(reslut) groupTransferManager(groupName, selectList?.getOrNull(0))
 //        getGroupQrcode(groupName)
         return reslut
     }
