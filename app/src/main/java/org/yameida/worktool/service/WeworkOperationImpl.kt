@@ -709,9 +709,8 @@ object WeworkOperationImpl {
                         val selectListView =
                             AccessibilityUtil.findOneByClazz(getRoot(), Views.ListView, Views.RecyclerView, Views.ViewGroup, minChildCount = 2)
                         if (selectListView != null) {
-                            val imageView =
-                                AccessibilityUtil.findOneByClazz(selectListView, Views.ImageView, root = false)
-                            AccessibilityUtil.performClick(imageView)
+                            val selectText= AccessibilityUtil.findOnceByText(selectListView,select,exact = true)
+                            if(selectText!=null) AccessibilityUtil.clickByNode(WeworkController.weworkService, selectText)
                             val textView = AccessibilityUtil.findOnceByClazz(getRoot(), Views.TextView)
                             if (textView != null && textView.text.isNullOrBlank()) {
                                 AccessibilityUtil.performClick(textView)
@@ -990,7 +989,7 @@ object WeworkOperationImpl {
         if (newManagerName == null) return true
         try {
             if (WeworkRoomUtil.intoGroupManager()) {
-                val tvList = AccessibilityUtil.findOnceByText(getRoot(), "群管理", exact = true)
+                val tvList = AccessibilityUtil.scrollAndFindByText(WeworkController.weworkService, getRoot(), "群管理")
                 if (tvList != null) {
                     AccessibilityUtil.clickByNode(WeworkController.weworkService, tvList)
                     sleep(Constant.CHANGE_PAGE_INTERVAL)
