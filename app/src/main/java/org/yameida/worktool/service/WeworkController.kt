@@ -3,6 +3,7 @@ package org.yameida.worktool.service
 import com.blankj.utilcode.util.*
 import org.yameida.worktool.Demo
 import org.yameida.worktool.annotation.RequestMapping
+import org.yameida.worktool.model.ExecCallbackBean
 import org.yameida.worktool.model.WeworkMessageBean
 
 /**
@@ -14,6 +15,18 @@ object WeworkController {
     lateinit var weworkService: WeworkService
     var enableLoopRunning = false
     var mainLoopRunning = false
+
+    /**
+     * 交互通知
+     * @see WeworkMessageBean.TYPE_CONSOLE_TOAST
+     * @param message#errorCode 失败错误码
+     * @param message#errorReason 失败原因
+     */
+    @RequestMapping
+    fun consoleToast(message: ExecCallbackBean): Boolean {
+        LogUtils.d("consoleToast(): ${message.errorCode} ${message.errorReason}")
+        return WeworkInteractionImpl.consoleToast(message, message.errorCode, message.errorReason)
+    }
 
     /**
      * 停止所有任务并返回首页待命
@@ -47,8 +60,8 @@ object WeworkController {
      */
     @RequestMapping
     fun sendMessage(message: WeworkMessageBean): Boolean {
-        LogUtils.d("sendMessage(): ${message.titleList} ${message.receivedContent} ${message.at}")
-        return WeworkOperationImpl.sendMessage(message.titleList, message.receivedContent, message.at)
+        LogUtils.d("sendMessage(): ${message.titleList} ${message.receivedContent} ${message.at} ${message.atList?.joinToString()}")
+        return WeworkOperationImpl.sendMessage(message, message.titleList, message.receivedContent, message.at, message.atList)
     }
 
     /**
@@ -59,13 +72,13 @@ object WeworkController {
      * @param message#originalContent 原始消息的内容
      * @param message#textType 原始消息的消息类型
      * @param message#receivedContent 回复内容
-     * @param message#prefix 回复内容前缀
      * @see WeworkMessageBean.TEXT_TYPE
      */
     @RequestMapping
     fun replyMessage(message: WeworkMessageBean): Boolean {
         LogUtils.d("replyMessage(): ${message.receivedName} ${message.originalContent} ${message.receivedContent}")
         return WeworkOperationImpl.replyMessage(
+            message,
             message.titleList,
             message.receivedName,
             message.originalContent,
@@ -89,6 +102,7 @@ object WeworkController {
     fun relayMessage(message: WeworkMessageBean): Boolean {
         LogUtils.d("relayMessage(): ${message.titleList} ${message.receivedName} ${message.originalContent} ${message.textType} ${message.nameList} ${message.extraText}")
         return WeworkOperationImpl.relayMessage(
+            message,
             message.titleList,
             message.receivedName,
             message.originalContent,
@@ -104,14 +118,19 @@ object WeworkController {
      * @param message#groupName 修改群名称
      * @param message#selectList 添加群成员名称列表 选填
      * @param message#groupAnnouncement 修改群公告 选填
+     * @param message#groupRemark 修改群备注 选填
+     * @param message#groupTemplate 修改群模板 选填
      */
     @RequestMapping
     fun initGroup(message: WeworkMessageBean): Boolean {
-        LogUtils.d("initGroup(): ${message.groupName} ${message.selectList} ${message.groupAnnouncement}")
+        LogUtils.d("initGroup(): ${message.groupName} ${message.selectList} ${message.groupAnnouncement} ${message.groupRemark} ${message.groupTemplate}")
         return WeworkOperationImpl.initGroup(
+            message,
             message.groupName,
             message.selectList,
-            message.groupAnnouncement
+            message.groupAnnouncement,
+            message.groupRemark,
+            message.groupTemplate
         )
     }
 
@@ -132,20 +151,39 @@ object WeworkController {
      * @param message#groupName 待修改的群
      * @param message#newGroupName 修改群名 选填
      * @param message#newGroupAnnouncement 修改群公告 选填
+     * @param message#groupRemark 修改群备注 选填
+     * @param message#groupTemplate 修改群模板 选填
      * @param message#selectList 添加群成员名称列表/拉人 选填
      * @param message#showMessageHistory 拉人是否附带历史记录 选填
      * @param message#removeList 移除群成员名称列表/踢人 选填
      */
     @RequestMapping
     fun intoGroupAndConfig(message: WeworkMessageBean): Boolean {
-        LogUtils.d("intoGroupAndConfig(): ${message.groupName} ${message.newGroupName} ${message.newGroupAnnouncement} ${message.selectList} ${message.showMessageHistory} ${message.removeList}")
+        LogUtils.d("intoGroupAndConfig(): ${message.groupName} ${message.newGroupName} ${message.newGroupAnnouncement} ${message.selectList} ${message.showMessageHistory} ${message.removeList} ${message.groupRemark} ${message.groupTemplate}")
         return WeworkOperationImpl.intoGroupAndConfig(
+            message,
             message.groupName,
             message.newGroupName,
             message.newGroupAnnouncement,
+            message.groupRemark,
+            message.groupTemplate,
             message.selectList,
             message.showMessageHistory,
             message.removeList
+        )
+    }
+
+    /**
+     * 解散群聊
+     * @see WeworkMessageBean.DISMISS_GROUP
+     * @param message#groupName 待解散的群
+     */
+    @RequestMapping
+    fun dismissGroup(message: WeworkMessageBean): Boolean {
+        LogUtils.d("dismissGroup(): ${message.groupName}")
+        return WeworkOperationImpl.dismissGroup(
+            message,
+            message.groupName
         )
     }
 
@@ -160,6 +198,7 @@ object WeworkController {
     fun pushMicroDiskImage(message: WeworkMessageBean): Boolean {
         LogUtils.d("pushMicroDiskImage(): ${message.titleList} ${message.objectName} ${message.extraText}")
         return WeworkOperationImpl.pushMicroDiskImage(
+            message,
             message.titleList,
             message.objectName,
             message.extraText
@@ -177,6 +216,7 @@ object WeworkController {
     fun pushMicroDiskFile(message: WeworkMessageBean): Boolean {
         LogUtils.d("pushMicroDiskFile(): ${message.titleList} ${message.objectName} ${message.extraText}")
         return WeworkOperationImpl.pushMicroDiskFile(
+            message,
             message.titleList,
             message.objectName,
             message.extraText
@@ -194,6 +234,7 @@ object WeworkController {
     fun pushMicroprogram(message: WeworkMessageBean): Boolean {
         LogUtils.d("pushMicroprogram(): ${message.titleList} ${message.objectName} ${message.extraText}")
         return WeworkOperationImpl.pushMicroprogram(
+            message,
             message.titleList,
             message.objectName,
             message.extraText
@@ -212,8 +253,31 @@ object WeworkController {
     fun pushOffice(message: WeworkMessageBean): Boolean {
         LogUtils.d("pushOffice(): ${message.titleList} ${message.objectName} ${message.extraText}")
         return WeworkOperationImpl.pushOffice(
+            message,
             message.titleList,
             message.objectName,
+            message.extraText
+        )
+    }
+
+    /**
+     * 推送文件(网络图片视频和文件等)
+     * @see WeworkMessageBean.PUSH_FILE
+     * @param message#titleList 待发送姓名列表
+     * @param message#objectName 文件名称
+     * @param message#fileUrl 文件网络地址
+     * @param message#fileType 文件类型
+     * @param message#extraText 附加留言 可选
+     */
+    @RequestMapping
+    fun pushFile(message: WeworkMessageBean): Boolean {
+        LogUtils.d("pushFile(): ${message.titleList} ${message.objectName} ${message.fileUrl} ${message.fileType} ${message.extraText}")
+        return WeworkOperationImpl.pushFile(
+            message,
+            message.titleList,
+            message.objectName,
+            message.fileUrl,
+            message.fileType,
             message.extraText
         )
     }
@@ -226,7 +290,7 @@ object WeworkController {
     @RequestMapping
     fun addFriendByPhone(message: WeworkMessageBean): Boolean {
         LogUtils.d("addFriendByPhone(): ${message.friend}")
-        return WeworkOperationImpl.addFriendByPhone(message.friend)
+        return WeworkOperationImpl.addFriendByPhone(message, message.friend)
     }
 
     /**
@@ -241,6 +305,7 @@ object WeworkController {
     fun showGroupInfo(message: WeworkMessageBean): Boolean {
         LogUtils.d("showGroupInfo(): ${message.titleList} ${message.receivedName} ${message.originalContent} ${message.textType}")
         return WeworkOperationImpl.showGroupInfo(
+            message,
             message.titleList,
             message.receivedName,
             message.originalContent,
@@ -256,7 +321,7 @@ object WeworkController {
     @RequestMapping
     fun getGroupInfo(message: WeworkMessageBean): Boolean {
         LogUtils.d("getGroupInfo(): ${message.selectList}")
-        return WeworkGetImpl.getGroupInfo(message.selectList)
+        return WeworkGetImpl.getGroupInfo(message, message.selectList)
     }
 
     /**
@@ -268,7 +333,7 @@ object WeworkController {
     @RequestMapping
     fun getFriendInfo(message: WeworkMessageBean): Boolean {
         LogUtils.d("getFriendInfo(): ${message.selectList}")
-        return WeworkGetImpl.getFriendInfo(message.selectList)
+        return WeworkGetImpl.getFriendInfo(message, message.selectList)
     }
 
     /**
@@ -276,9 +341,9 @@ object WeworkController {
      * @see WeworkMessageBean.GET_MY_INFO
      */
     @RequestMapping
-    fun getMyInfo(): Boolean {
+    fun getMyInfo(message: WeworkMessageBean): Boolean {
         LogUtils.d("getMyInfo():")
-        return WeworkGetImpl.getMyInfo()
+        return WeworkGetImpl.getMyInfo(message)
     }
 
 }

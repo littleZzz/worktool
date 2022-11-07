@@ -14,6 +14,7 @@ public class WeworkMessageBean {
      * <p>
      * 消息类型 100
      * 上传消息列表 TYPE_RECEIVE_MESSAGE_LIST
+     * 交互通知 TYPE_CONSOLE_TOAST
      * <p>
      * 全局操作类型 200
      * 停止所有任务并返回首页待命 STOP_AND_GO_HOME
@@ -21,7 +22,7 @@ public class WeworkMessageBean {
      * 在房间内发送消息 SEND_MESSAGE
      * 在房间内指定回复消息 REPLY_MESSAGE
      * 在房间内转发消息 RELAY_MESSAGE
-     * 创建群 CREATE_GROUP
+     * 创建群 INIT_GROUP
      * 进入群聊并修改群配置 INTO_GROUP_AND_CONFIG
      * 推送微盘图片 PUSH_MICRO_DISK_IMAGE
      * 推送微盘文件 PUSH_MICRO_DISK_FILE
@@ -30,6 +31,7 @@ public class WeworkMessageBean {
      * 通过当前所有好友请求 PASS_ALL_FRIEND_REQUEST
      * 按手机号添加好友 ADD_FRIEND_BY_PHONE
      * 展示群信息 SHOW_GROUP_INFO
+     * 推送文件(网络图片视频和文件等) PUSH_FILE
      * <p>
      * 非操作类型 300
      * 机器人普通日志记录 ROBOT_LOG
@@ -43,6 +45,7 @@ public class WeworkMessageBean {
      */
     public static final int HEART_BEAT = 11;
     public static final int TYPE_RECEIVE_MESSAGE_LIST = 101;
+    public static final int TYPE_CONSOLE_TOAST = 102;
 
     public static final int STOP_AND_GO_HOME = 201;
     public static final int LOOP_RECEIVE_NEW_MESSAGE = 202;
@@ -61,6 +64,8 @@ public class WeworkMessageBean {
     public static final int INIT_ANTI_HARASSMENT_RULE = 215;
     public static final int UPDATE_ANTI_HARASSMENT_RULE = 216;
     public static final int DELETED_ANTI_HARASSMENT_RULE = 217;
+    public static final int PUSH_FILE = 218;
+    public static final int DISMISS_GROUP = 219;
 
     public static final int ROBOT_LOG = 301;
     public static final int ROBOT_ERROR_LOG = 302;
@@ -126,6 +131,9 @@ public class WeworkMessageBean {
     public static final int TEXT_TYPE_COLLECTION = 14;
     public static final int TEXT_TYPE_REPLY = 15;
 
+    //消息id(解析指令时同步)
+    public String messageId;
+
     //标题 通常是群名或联系人
     public List<String> titleList;
     //上传聊天列表
@@ -139,10 +147,10 @@ public class WeworkMessageBean {
     public String receivedName;
     //内容移除了@me
     public String receivedContent;
-    //回复内容前缀
-    public String prefix;
     //想要at的昵称
     public String at;
+    //想要at的昵称列表
+    public List<String> atList;
     //原始内容text
     public String originalContent;
     //多选(转发等)
@@ -162,6 +170,10 @@ public class WeworkMessageBean {
     public Integer groupNumber;
     //群公告
     public String groupAnnouncement;
+    //群备注
+    public String groupRemark;
+    //群模板
+    public String groupTemplate;
     //新群名
     public String newGroupName;
     //新群公告
@@ -180,6 +192,10 @@ public class WeworkMessageBean {
     //添加好友
     public Friend friend;
 
+    //网络文件
+    public String fileUrl;
+    public String fileType;
+
     public WeworkMessageBean() {}
 
     public WeworkMessageBean(String receivedName, String receivedContent, int type, Integer roomType, List<String> titleList, List<SubMessageBean> messageList, String log) {
@@ -192,6 +208,7 @@ public class WeworkMessageBean {
         this.receivedName = receivedName;
     }
 
+    //消息类型
     public int type = 0;
 
     //消息列表的每条消息
@@ -254,6 +271,21 @@ public class WeworkMessageBean {
         public List<String> tagList;
         //是否是新好友
         public Boolean newFriend;
+        //留言
+        public String leavingMsg;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Friend friend = (Friend) o;
+            return Objects.equals(phone, friend.phone) && Objects.equals(name, friend.name) && Objects.equals(markName, friend.markName) && Objects.equals(markCorp, friend.markCorp) && Objects.equals(markExtra, friend.markExtra) && Objects.equals(tagList, friend.tagList) && Objects.equals(newFriend, friend.newFriend) && Objects.equals(leavingMsg, friend.leavingMsg);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(phone, name, markName, markCorp, markExtra, tagList, newFriend, leavingMsg);
+        }
     }
 
     @Override
@@ -261,12 +293,12 @@ public class WeworkMessageBean {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WeworkMessageBean that = (WeworkMessageBean) o;
-        return textType == that.textType && showMessageHistory == that.showMessageHistory && type == that.type && Objects.equals(titleList, that.titleList) && Objects.equals(messageList, that.messageList) && Objects.equals(log, that.log) && Objects.equals(roomType, that.roomType) && Objects.equals(receivedName, that.receivedName) && Objects.equals(receivedContent, that.receivedContent) && Objects.equals(originalContent, that.originalContent) && Objects.equals(nameList, that.nameList) && Objects.equals(extraText, that.extraText) && Objects.equals(groupName, that.groupName) && Objects.equals(groupOwner, that.groupOwner) && Objects.equals(selectList, that.selectList) && Objects.equals(groupNumber, that.groupNumber) && Objects.equals(groupAnnouncement, that.groupAnnouncement) && Objects.equals(newGroupName, that.newGroupName) && Objects.equals(newGroupAnnouncement, that.newGroupAnnouncement) && Objects.equals(removeList, that.removeList) && Objects.equals(myInfo, that.myInfo) && Objects.equals(objectName, that.objectName);
+        return textType == that.textType && showMessageHistory == that.showMessageHistory && type == that.type && Objects.equals(titleList, that.titleList) && Objects.equals(messageList, that.messageList) && Objects.equals(log, that.log) && Objects.equals(roomType, that.roomType) && Objects.equals(receivedName, that.receivedName) && Objects.equals(receivedContent, that.receivedContent) && Objects.equals(at, that.at) && Objects.equals(atList, that.atList) && Objects.equals(originalContent, that.originalContent) && Objects.equals(nameList, that.nameList) && Objects.equals(extraText, that.extraText) && Objects.equals(groupName, that.groupName) && Objects.equals(groupOwner, that.groupOwner) && Objects.equals(selectList, that.selectList) && Objects.equals(groupNumber, that.groupNumber) && Objects.equals(groupAnnouncement, that.groupAnnouncement) && Objects.equals(groupRemark, that.groupRemark) && Objects.equals(groupTemplate, that.groupTemplate) && Objects.equals(newGroupName, that.newGroupName) && Objects.equals(newGroupAnnouncement, that.newGroupAnnouncement) && Objects.equals(removeList, that.removeList) && Objects.equals(myInfo, that.myInfo) && Objects.equals(objectName, that.objectName) && Objects.equals(qrcode, that.qrcode) && Objects.equals(friend, that.friend) && Objects.equals(fileUrl, that.fileUrl) && Objects.equals(fileType, that.fileType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(titleList, messageList, log, roomType, receivedName, receivedContent, originalContent, nameList, extraText, textType, groupName, groupOwner, selectList, groupNumber, groupAnnouncement, newGroupName, newGroupAnnouncement, removeList, showMessageHistory, myInfo, objectName, type);
+        return Objects.hash(titleList, messageList, log, roomType, receivedName, receivedContent, at, atList, originalContent, nameList, extraText, textType, groupName, groupOwner, selectList, groupNumber, groupAnnouncement, groupRemark, groupTemplate, newGroupName, newGroupAnnouncement, removeList, showMessageHistory, myInfo, objectName, qrcode, friend, fileUrl, fileType, type);
     }
 
     @Override
@@ -278,6 +310,8 @@ public class WeworkMessageBean {
                 ", roomType=" + roomType +
                 ", receivedName='" + receivedName + '\'' +
                 ", receivedContent='" + receivedContent + '\'' +
+                ", at='" + at + '\'' +
+                ", atList=" + atList +
                 ", originalContent='" + originalContent + '\'' +
                 ", nameList=" + nameList +
                 ", extraText='" + extraText + '\'' +
@@ -287,12 +321,18 @@ public class WeworkMessageBean {
                 ", selectList=" + selectList +
                 ", groupNumber=" + groupNumber +
                 ", groupAnnouncement='" + groupAnnouncement + '\'' +
+                ", groupRemark='" + groupRemark + '\'' +
+                ", groupTemplate='" + groupTemplate + '\'' +
                 ", newGroupName='" + newGroupName + '\'' +
                 ", newGroupAnnouncement='" + newGroupAnnouncement + '\'' +
                 ", removeList=" + removeList +
                 ", showMessageHistory=" + showMessageHistory +
                 ", myInfo=" + myInfo +
                 ", objectName='" + objectName + '\'' +
+                ", qrcode='" + qrcode + '\'' +
+                ", friend=" + friend +
+                ", fileUrl='" + fileUrl + '\'' +
+                ", fileType='" + fileType + '\'' +
                 ", type=" + type +
                 '}';
     }

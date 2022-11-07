@@ -6,10 +6,7 @@ import org.yameida.worktool.utils.AccessibilityUtil.findFrontNode
 import org.yameida.worktool.model.WeworkMessageBean
 import com.blankj.utilcode.util.LogUtils
 import org.yameida.worktool.Constant
-import org.yameida.worktool.service.backPress
-import org.yameida.worktool.service.getRoot
-import org.yameida.worktool.service.goHome
-import org.yameida.worktool.service.sleep
+import org.yameida.worktool.service.*
 import org.yameida.worktool.utils.AccessibilityUtil.findAllOnceByClazz
 
 /**
@@ -22,7 +19,7 @@ object WeworkRoomUtil {
      * @see WeworkMessageBean.ROOM_TYPE
      */
     fun getRoomType(print: Boolean = true): Int {
-        val roomTitle = getRoomTitle()
+        val roomTitle = getRoomTitle(noCut = true)
         when {
             isExternalSingleChat(roomTitle) -> {
                 LogUtils.d("ROOM_TYPE: ROOM_TYPE_EXTERNAL_CONTACT")
@@ -55,7 +52,7 @@ object WeworkRoomUtil {
      * @see WeworkMessageBean.ROOM_TYPE_INTERNAL_GROUP
      * @see WeworkMessageBean.ROOM_TYPE_INTERNAL_CONTACT
      */
-    fun getRoomTitle(print: Boolean = true): ArrayList<String> {
+    fun getRoomTitle(print: Boolean = true, noCut: Boolean = false): ArrayList<String> {
         val titleList = arrayListOf<String>()
         //聊天消息列表 1ListView 0RecycleView xViewGroup
         val list = AccessibilityUtil.findOnceByClazz(getRoot(), Views.ListView)
@@ -66,8 +63,8 @@ object WeworkRoomUtil {
                 if (!textView.text.isNullOrBlank()) {
                     val text = textView.text.toString()
                     titleList.add(text.replace("\\(\\d+\\)$".toRegex(), ""))
-                    if (text.contains("\\(\\d+\\)$".toRegex())) {
-                        titleList.add(text)
+                    if (noCut && text.contains("\\(\\d+\\)$".toRegex())) {
+                            titleList.add(text)
                     }
                 }
             }
@@ -101,16 +98,33 @@ object WeworkRoomUtil {
                 val searchButton: AccessibilityNodeInfo = textViewList[textViewList.size - 2]
                 val multiButton: AccessibilityNodeInfo = textViewList[textViewList.size - 1]
                 AccessibilityUtil.performClick(searchButton)
-                AccessibilityUtil.findTextInput(getRoot(), title.replace("…", "").replace("-.*$".toRegex(), ""))
+                val needTrim = title.contains(Constant.regTrimTitle)
+                val trimTitle = title.replace(Constant.regTrimTitle, "")
+                AccessibilityUtil.findTextInput(getRoot(), trimTitle)
                 sleep(Constant.CHANGE_PAGE_INTERVAL)
                 //消息页搜索结果列表
                 val selectListView = findOneByClazz(getRoot(), Views.ListView)
-                val imageView = AccessibilityUtil.findOnceByClazz(selectListView, Views.ImageView)
-                if (imageView != null) {
-                    AccessibilityUtil.performClick(imageView)
-                    LogUtils.d("进入房间: $title")
-                    sleep(Constant.CHANGE_PAGE_INTERVAL)
-                    return true
+                val reverseRegexTitle = RegexHelper.reverseRegexTitle(trimTitle)
+                val regex = "^$reverseRegexTitle" + if (needTrim) ".*?" else "(-.*)?(…)?(\\(.*?\\))?$"
+                val searchResult = AccessibilityUtil.findAllByTextRegex(
+                    selectListView,
+                    regex,
+                    timeout = 2000,
+                    root = false
+                )
+                if (searchResult.isNotEmpty()) {
+                    //过滤已退出的群聊
+                    val searchItem = searchResult.firstOrNull {
+                        it.parent.childCount < 3
+                    }
+                    if (searchItem != null) {
+                        AccessibilityUtil.performClick(searchItem)
+                        LogUtils.d("进入房间: $title")
+                        sleep(Constant.CHANGE_PAGE_INTERVAL)
+                        return true
+                    } else {
+                        LogUtils.e("搜索到已退出群聊")
+                    }
                 } else {
                     LogUtils.e("未搜索到结果")
                 }

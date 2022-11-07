@@ -18,7 +18,7 @@ object WeworkGetImpl {
      * 获取群信息
      * @param selectList 群名列表 为空时去群管理页查询并返回群聊页
      */
-    fun getGroupInfo(selectList: List<String>): Boolean {
+    fun getGroupInfo(message: WeworkMessageBean, selectList: List<String>): Boolean {
         if (selectList.isNullOrEmpty()) {
             WeworkRoomUtil.intoGroupManager()
             val groupInfo = getGroupInfoDetail()
@@ -39,21 +39,21 @@ object WeworkGetImpl {
      * 获取好友信息
      * @param selectList 好友名列表
      */
-    fun getFriendInfo(selectList: List<String>): Boolean {
+    fun getFriendInfo(message: WeworkMessageBean, selectList: List<String>): Boolean {
         return true
     }
 
     /**
      * 获取我的信息
      */
-    fun getMyInfo(): Boolean {
+    fun getMyInfo(message: WeworkMessageBean): Boolean {
         if (!goHomeTab("我")) {
             LogUtils.d("未找到我的信息")
             log("未找到我的信息")
             goHomeTab("消息")
             val firstTv = AccessibilityUtil.findAllByClazz(getRoot(), Views.TextView)
                 .firstOrNull { it.text == null }
-            AccessibilityUtil.performClick(firstTv)
+            AccessibilityUtil.performClick(firstTv, retry = false)
             sleep(Constant.CHANGE_PAGE_INTERVAL)
             val newFirstTv = AccessibilityUtil.findOneByClazz(getRoot(), Views.TextView)
             val nickname = newFirstTv?.text?.toString()
@@ -139,7 +139,7 @@ object WeworkGetImpl {
     }
 
     /**
-     * 获取群名、群主、群成员数、群公告
+     * 获取群名、群主、群成员数、群公告、群备注
      */
     fun getGroupInfoDetail(): WeworkMessageBean {
         val weworkMessageBean = WeworkMessageBean()
@@ -187,6 +187,12 @@ object WeworkGetImpl {
         if (tvAnnouncement != null && tvAnnouncement.text != null) {
             LogUtils.d("群公告: " + tvAnnouncement.text)
             weworkMessageBean.groupAnnouncement = tvAnnouncement.text.toString()
+        }
+        val tvRemarkFlag = AccessibilityUtil.findOnceByText(getRoot(), "备注", exact = true)
+        val tvRemark = AccessibilityUtil.findOnceByClazz(AccessibilityUtil.findBackNode(tvRemarkFlag), Views.TextView)
+        if (tvRemark != null && tvRemark.text != null) {
+            LogUtils.d("群备注: " + tvRemark.text)
+            weworkMessageBean.groupRemark = tvRemark.text.toString()
         }
         backPress()
         return weworkMessageBean

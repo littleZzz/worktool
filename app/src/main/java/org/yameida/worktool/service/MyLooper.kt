@@ -9,6 +9,7 @@ import com.blankj.utilcode.util.LogUtils
 import com.google.gson.reflect.TypeToken
 import okhttp3.WebSocket
 import org.yameida.worktool.Constant
+import org.yameida.worktool.model.ExecCallbackBean
 import org.yameida.worktool.model.WeworkMessageBean
 import org.yameida.worktool.model.WeworkMessageListBean
 import java.nio.charset.StandardCharsets
@@ -31,6 +32,7 @@ object MyLooper {
                         dealWithMessage(msg.obj as WeworkMessageBean)
                     } catch (e: Exception) {
                         LogUtils.e(e)
+                        uploadCommandResult(msg.obj as WeworkMessageBean, ExecCallbackBean.ERROR_ILLEGAL_OPERATION, e.message ?: "", 0L)
                     }
                 }
             }
@@ -46,12 +48,13 @@ object MyLooper {
         while (true) {
             threadHandler?.let { return it }
             LogUtils.e("threadHandler is not ready...")
+            sleep(Constant.POP_WINDOW_INTERVAL / 5)
         }
     }
 
     fun onMessage(webSocket: WebSocket?, text: String) {
-        val messageList =
-            GsonUtils.fromJson<WeworkMessageListBean>(text, WeworkMessageListBean::class.java)
+        val messageList: WeworkMessageListBean<WeworkMessageBean> =
+            GsonUtils.fromJson<WeworkMessageListBean<WeworkMessageBean>>(text, object : TypeToken<WeworkMessageListBean<ExecCallbackBean>>(){}.type)
         if (messageList.socketType == WeworkMessageListBean.SOCKET_TYPE_HEARTBEAT) {
             return
         }
@@ -80,10 +83,10 @@ object MyLooper {
                     WeworkController.enableLoopRunning = true
                 } else {
                     WeworkController.mainLoopRunning = false
-                    getInstance().removeMessages(message.type * message.hashCode())
+                    LogUtils.v("加入指令到执行队列", GsonUtils.toJson(message))
                     getInstance().sendMessage(Message.obtain().apply {
                         what = message.type * message.hashCode()
-                        obj = message
+                        obj = message.apply { messageId = messageList.messageId }
                     })
                 }
                 getInstance().removeMessages(WeworkMessageBean.LOOP_RECEIVE_NEW_MESSAGE)
@@ -97,6 +100,9 @@ object MyLooper {
 
     private fun dealWithMessage(message: WeworkMessageBean) {
         when (message.type) {
+            WeworkMessageBean.TYPE_CONSOLE_TOAST -> {
+                WeworkController.consoleToast(message as ExecCallbackBean)
+            }
             WeworkMessageBean.STOP_AND_GO_HOME -> {
                 WeworkController.stopAndGoHome()
             }
@@ -130,6 +136,12 @@ object MyLooper {
             WeworkMessageBean.PUSH_OFFICE -> {
                 WeworkController.pushOffice(message)
             }
+            WeworkMessageBean.PUSH_FILE -> {
+                WeworkController.pushFile(message)
+            }
+            WeworkMessageBean.DISMISS_GROUP -> {
+                WeworkController.dismissGroup(message)
+            }
             WeworkMessageBean.PASS_ALL_FRIEND_REQUEST -> {
             }
             WeworkMessageBean.ADD_FRIEND_BY_PHONE -> {
@@ -145,7 +157,7 @@ object MyLooper {
                 WeworkController.getFriendInfo(message)
             }
             WeworkMessageBean.GET_MY_INFO -> {
-                WeworkController.getMyInfo()
+                WeworkController.getMyInfo(message)
             }
             WeworkMessageBean.ROBOT_CONTROLLER_TEST -> {
                 WeworkController.test(message)

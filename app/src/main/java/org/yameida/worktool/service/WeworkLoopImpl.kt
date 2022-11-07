@@ -1,10 +1,10 @@
 package org.yameida.worktool.service
 
-import android.os.Build
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.text.isDigitsOnly
 import com.blankj.utilcode.util.LogUtils
 import org.yameida.worktool.Constant
+import org.yameida.worktool.Demo
 import org.yameida.worktool.model.WeworkMessageBean
 import org.yameida.worktool.service.WeworkController.mainLoopRunning
 import org.yameida.worktool.utils.*
@@ -54,6 +54,13 @@ object WeworkLoopImpl {
                 if (item.parent.childCount > 1) {
                     LogUtils.d("通讯录有红点")
                     AccessibilityUtil.performClick(item)
+                    val hasRecommendFriend = AccessibilityUtil.findOneByText(getRoot(), "可能的", timeout = Constant.POP_WINDOW_INTERVAL)
+                    if (hasRecommendFriend != null) {
+                        LogUtils.d("有可能认识的人")
+                        AccessibilityUtil.performClick(hasRecommendFriend)
+                        goHome()
+                        return false
+                    }
                     val addButton = AccessibilityUtil.findOneByText(getRoot(), "添加")
                     val backNode = AccessibilityUtil.findBackNode(addButton)
                     if (backNode?.className == Views.TextView) {
@@ -185,7 +192,7 @@ object WeworkLoopImpl {
                 //回到上一页
                 var retry = 5
                 while (retry-- > 0 && !isAtHome()) {
-                    val textView = AccessibilityUtil.findOnceByText(getRoot(), "新的客户", "新的居民", exact = true)
+                    val textView = AccessibilityUtil.findOnceByText(getRoot(), "新的客户", "新的居民", "新的学员", exact = true)
                     if (textView == null) {
                         backPress()
                     }
@@ -202,30 +209,20 @@ object WeworkLoopImpl {
         if (Constant.autoReply == 0) return true
         if (!isAtHome()) return true
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val list = AccessibilityUtil.findAllOnceByText(getRoot(), "消息", exact = true)
-            for (item in list) {
-                if (item.parent.parent.parent.childCount == 5) {
-                    if (item.parent.childCount > 1) {
-                        LogUtils.d("消息有红点")
-                        AccessibilityUtil.clickByNode(WeworkController.weworkService, item)
-                        sleep(100)
-                        AccessibilityUtil.clickByNode(WeworkController.weworkService, item)
-                    }
+        val list = AccessibilityUtil.findAllOnceByText(getRoot(), "消息", exact = true)
+        for (item in list) {
+            if (item.parent.parent.parent.childCount == 5) {
+                if (item.parent.childCount > 1) {
+                    LogUtils.d("消息有红点")
+                    AccessibilityUtil.clickByNode(WeworkController.weworkService, item)
+                    sleep(100)
+                    AccessibilityUtil.clickByNode(WeworkController.weworkService, item)
                 }
             }
-            if (logIndex % 120 == 0) {
-                goHomeTab("通讯录")
-                goHomeTab("消息")
-            }
-        } else {
-            if (logIndex % 3 == 0) {
-                AccessibilityUtil.performScrollUp(getRoot(), 0)
-                AccessibilityUtil.performScrollUp(getRoot(), 0)
-                AccessibilityUtil.performScrollUp(getRoot(), 0)
-            } else if (logIndex % 120 < 3) {
-                AccessibilityUtil.performScrollDown(getRoot(), 0)
-            }
+        }
+        if (logIndex % 120 == 0) {
+            goHomeTab("通讯录")
+            goHomeTab("消息")
         }
         if (!isAtHome()) return true
         if (logIndex++ % 30 == 0) {
@@ -277,12 +274,7 @@ object WeworkLoopImpl {
             if (AccessibilityUtil.performClick(spotNodeList.first())) {
                 //进入聊天页 下一步 getChatMessageList
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    AccessibilityUtil
-                        .clickByNode(WeworkController.weworkService, spotNodeList.first().parent)
-                } else {
-                    LogUtils.e("请将手机版本提升到 Android 7.0+ 或将企业微信版本回退到 4.0.8之前(4.0.6可用)")
-                }
+                AccessibilityUtil.clickByNode(WeworkController.weworkService, spotNodeList.first().parent)
             }
             return true
         } else {

@@ -4,9 +4,11 @@ import android.util.Log;
 
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.LogUtils;
+import com.hjq.toast.ToastUtils;
 
 import org.yameida.worktool.model.WeworkMessageBean;
 import org.yameida.worktool.model.WeworkMessageListBean;
+import org.yameida.worktool.service.WeworkController;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,15 +26,11 @@ import okhttp3.WebSocketListener;
 
 public class WebSocketManager {
 
-    public static final String HEARTBEAT = "{" +
-            "\"type\": " + WeworkMessageBean.HEART_BEAT +
-            ",\"hearBeat\": \"心跳检测\"" +
-            "}";
+    public static final String HEARTBEAT = "{\"type\":" + WeworkMessageBean.HEART_BEAT + "}";
     private static final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     public static Map<String, WebSocketManager> webSocketManager = new ConcurrentHashMap<>();
-    private static final int reconnectTimes = 7;
     private static final int reconnectInt = 5000;  //毫秒
-    private static final long heartBeatRate = 15;  //秒
+    private static final long heartBeatRate = 10;  //秒
     private Map<String, Long> messageIdMap = new ConcurrentHashMap<>();
     private ScheduledFuture task;
     private WebSocket socket;
@@ -52,7 +50,7 @@ public class WebSocketManager {
     }
 
     public void send(WeworkMessageBean msg) {
-        send(new WeworkMessageListBean(msg, WeworkMessageListBean.SOCKET_TYPE_MESSAGE_LIST));
+        send(new WeworkMessageListBean(msg, WeworkMessageListBean.SOCKET_TYPE_MESSAGE_LIST, null));
     }
 
     /**
@@ -101,7 +99,6 @@ public class WebSocketManager {
         Log.e(url, "链接关闭");
     }
 
-
     public static void closeManager() {
         Log.e("SocketManager", "关闭Manager:");
         for (Map.Entry<String, WebSocketManager> e : webSocketManager.entrySet()) {
@@ -115,10 +112,14 @@ public class WebSocketManager {
         connecting = true;
         Log.e(url, "重连");
         boolean isConnect = false;
+        int interval = reconnectInt;
         while (!isConnect) {
             try {
                 isConnect = connect();
-                Thread.sleep(reconnectInt);
+                Thread.sleep(interval);
+                if (interval < 600000) {
+                    interval *= 2;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -140,8 +141,12 @@ public class WebSocketManager {
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
             Log.e(url, "心跳检测" + df.format(new Date()));// new Date()为获取当前系统时间
             if (!connecting && (socket == null || !socket.send(HEARTBEAT))) {
+                //断开链接后关闭新消息接收
+                WeworkController.INSTANCE.setEnableLoopRunning(false);
+                //断开链接后进入重连
                 reConnect();
             }
+            ToastUtils.show("机器人运行中 请勿人工操作手机~");
         };
 
         //每heartBeatRate秒发一次心跳包
