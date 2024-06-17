@@ -16,6 +16,11 @@ import update.UpdateAppUtils
 
 class MyApplication : Application() {
 
+    //我改动了  01
+    //我又改动了 02
+    //我还改动了 03
+    //社工看  04
+
     companion object {
 
         /**
