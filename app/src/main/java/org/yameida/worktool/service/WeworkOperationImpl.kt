@@ -3,9 +3,7 @@ package org.yameida.worktool.service
 import android.view.accessibility.AccessibilityNodeInfo
 import org.yameida.worktool.Constant
 import org.yameida.worktool.model.WeworkMessageBean
-import com.github.yoojia.qrcode.qrcode.QRCodeDecoder
 import com.blankj.utilcode.util.*
-import com.lzy.okgo.OkGo
 import org.yameida.worktool.model.ExecCallbackBean
 import org.yameida.worktool.utils.*
 import java.io.File
@@ -553,40 +551,42 @@ object WeworkOperationImpl {
             return false
         }
         LogUtils.i("下载开始 $fileUrl")
-        val execute = OkGo.get<File>(fileUrl).execute()
-        LogUtils.i("下载完成 $fileUrl")
-        val body = execute.body()
-        if (body != null) {
-            val df = SimpleDateFormat("yyyy-MM-dd")
-            val filePath = "${Utils.getApp().getExternalFilesDir("share")}/${df.format(Date())}/$objectName"
-            val newFile = File(filePath)
-            val create = FileUtils.createFileByDeleteOldFile(newFile)
-            if (create && newFile.canWrite()) {
-                newFile.writeBytes(body.bytes())
-                LogUtils.i("文件存储本地成功 $filePath")
-                ShareUtil.share("${if (fileType.isBlank()) "*" else fileType}/*", newFile)
-                val shareToWorkButton = AccessibilityUtil.findOneByText(getRoot(true), "发送给同事")
-                AccessibilityUtil.performClick(shareToWorkButton)
-                if (relaySelectTarget(titleList, extraText)) {
-                    val stayButton = AccessibilityUtil.findOneByText(getRoot(), "留在企业微信")
-                    AccessibilityUtil.performClick(stayButton)
-                    uploadCommandResult(message, ExecCallbackBean.SUCCESS, "", startTime)
-                    return true
-                } else {
-                    LogUtils.e("文件转发失败: $objectName")
-                    uploadCommandResult(message, ExecCallbackBean.ERROR_RELAY, "文件转发失败: $objectName", startTime)
-                    return false
-                }
-            } else {
-                LogUtils.e("文件存储本地失败 $filePath")
-                uploadCommandResult(message, ExecCallbackBean.ERROR_FILE_STORAGE, "文件存储本地失败 $filePath", startTime)
-                return false
-            }
-        } else {
-            LogUtils.e("文件下载失败")
-            uploadCommandResult(message, ExecCallbackBean.ERROR_FILE_DOWNLOAD, "文件下载失败 $fileUrl", startTime)
-            return false
-        }
+        return false
+
+//        val execute = OkGo.get<File>(fileUrl).execute()
+//        LogUtils.i("下载完成 $fileUrl")
+//        val body = execute.body()
+//        if (body != null) {
+//            val df = SimpleDateFormat("yyyy-MM-dd")
+//            val filePath = "${Utils.getApp().getExternalFilesDir("share")}/${df.format(Date())}/$objectName"
+//            val newFile = File(filePath)
+//            val create = FileUtils.createFileByDeleteOldFile(newFile)
+//            if (create && newFile.canWrite()) {
+//                newFile.writeBytes(body.bytes())
+//                LogUtils.i("文件存储本地成功 $filePath")
+//                ShareUtil.share("${if (fileType.isBlank()) "*" else fileType}/*", newFile)
+//                val shareToWorkButton = AccessibilityUtil.findOneByText(getRoot(true), "发送给同事")
+//                AccessibilityUtil.performClick(shareToWorkButton)
+//                if (relaySelectTarget(titleList, extraText)) {
+//                    val stayButton = AccessibilityUtil.findOneByText(getRoot(), "留在企业微信")
+//                    AccessibilityUtil.performClick(stayButton)
+//                    uploadCommandResult(message, ExecCallbackBean.SUCCESS, "", startTime)
+//                    return true
+//                } else {
+//                    LogUtils.e("文件转发失败: $objectName")
+//                    uploadCommandResult(message, ExecCallbackBean.ERROR_RELAY, "文件转发失败: $objectName", startTime)
+//                    return false
+//                }
+//            } else {
+//                LogUtils.e("文件存储本地失败 $filePath")
+//                uploadCommandResult(message, ExecCallbackBean.ERROR_FILE_STORAGE, "文件存储本地失败 $filePath", startTime)
+//                return false
+//            }
+//        } else {
+//            LogUtils.e("文件下载失败")
+//            uploadCommandResult(message, ExecCallbackBean.ERROR_FILE_DOWNLOAD, "文件下载失败 $fileUrl", startTime)
+//            return false
+//        }
     }
 
     /**
@@ -1376,17 +1376,17 @@ object WeworkOperationImpl {
                                 LogUtils.d("找到最新保存二维码图片: $fileTime")
                                 try {
                                     val bitmap = ImageUtils.bytes2Bitmap(file.readBytes())
-                                    val mDecoder = QRCodeDecoder.Builder().build()
-                                    val qrcode = mDecoder.decode(bitmap)
-                                    LogUtils.e("group: $groupName qrcode: $qrcode")
-                                    val weworkMessageBean = WeworkMessageBean()
-                                    weworkMessageBean.type = WeworkMessageBean.GET_GROUP_QRCODE
-                                    weworkMessageBean.groupName = groupName
-                                    weworkMessageBean.groupRemark = groupRemark
-                                    weworkMessageBean.qrcode = qrcode
-                                    WeworkController.weworkService.webSocketManager.send(
-                                        weworkMessageBean
-                                    )
+//                                    val mDecoder = QRCodeDecoder.Builder().build()
+//                                    val qrcode = mDecoder.decode(bitmap)
+//                                    LogUtils.e("group: $groupName qrcode: $qrcode")
+//                                    val weworkMessageBean = WeworkMessageBean()
+//                                    weworkMessageBean.type = WeworkMessageBean.GET_GROUP_QRCODE
+//                                    weworkMessageBean.groupName = groupName
+//                                    weworkMessageBean.groupRemark = groupRemark
+//                                    weworkMessageBean.qrcode = qrcode
+//                                    WeworkController.weworkService.webSocketManager.send(
+//                                        weworkMessageBean
+//                                    )
                                     return true
                                 } catch (e: Exception) {
                                     e.printStackTrace()

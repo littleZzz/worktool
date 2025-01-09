@@ -8,8 +8,6 @@ import android.widget.Switch
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.*
-import com.umeng.analytics.MobclickAgent
-import kotlinx.android.synthetic.main.activity_listen.*
 import org.yameida.worktool.*
 import org.yameida.worktool.service.WeworkService
 import org.yameida.worktool.utils.UpdateUtil
@@ -18,6 +16,7 @@ import android.content.*
 import android.widget.Button
 import android.widget.EditText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.yameida.worktool.databinding.ActivityListenBinding
 import org.yameida.worktool.utils.HostTestHelper
 import org.yameida.worktool.utils.PermissionHelper
 import org.yameida.worktool.utils.PermissionPageManagement
@@ -25,12 +24,17 @@ import org.yameida.worktool.utils.PermissionPageManagement
 
 class ListenActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityListenBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         title = "WorkTool"
-        setContentView(R.layout.activity_listen)
+        // 初始化绑定类
+        binding = ActivityListenBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+//        setContentView(R.layout.activity_listen)
 
         initView()
         initAccessibility()
@@ -47,10 +51,10 @@ class ListenActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        sw_overlay.isChecked = PermissionUtils.isGrantedDrawOverlays()
+        binding.swOverlay.isChecked = PermissionUtils.isGrantedDrawOverlays()
         freshOpenServiceSwitch(
             WeworkService::class.java,
-            sw_accessibility
+            binding.swAccessibility
         )
         if (needToWork) {
             needToWork = false
@@ -59,50 +63,52 @@ class ListenActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        et_channel.setText(SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID))
-        bt_save.setOnClickListener {
-            val channel = et_channel.text.toString().trim()
+        binding.etChannel.setText(SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID))
+        binding.btSave.setOnClickListener {
+            val channel = binding.etChannel.text.toString().trim()
             SPUtils.getInstance().put(Constant.LISTEN_CHANNEL_ID, channel)
             ToastUtils.showLong("保存成功")
             sendBroadcast(Intent(Constant.WEWORK_NOTIFY).apply {
                 putExtra("type", "modify_channel")
             })
-            MobclickAgent.onProfileSignIn(channel)
         }
-        sw_encrypt.isChecked = Constant.encryptType == 1
-        sw_encrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        binding.swEncrypt.isChecked = Constant.encryptType == 1
+        binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             LogUtils.i("sw_encrypt onCheckedChanged: $isChecked")
             Constant.encryptType = if (isChecked) 1 else 0
             SPUtils.getInstance().put("encryptType", Constant.encryptType)
         })
-        sw_auto_reply.isChecked = Constant.autoReply == 1
-        sw_auto_reply.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        binding.swAutoReply.isChecked = Constant.autoReply == 1
+        binding.swAutoReply.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             LogUtils.i("sw_auto_reply onCheckedChanged: $isChecked")
             Constant.autoReply = if (isChecked) 1 else 0
             SPUtils.getInstance().put("autoReply", Constant.autoReply)
         })
-        tv_host.text = Constant.host
-        tv_host.setOnLongClickListener {
+        binding.tvHost.text = Constant.host
+        binding.tvHost.setOnLongClickListener {
             showInputDialog()
             true
         }
-        val version = "${AppUtils.getAppVersionName()}     Android ${DeviceUtils.getSDKVersionName()} ${DeviceUtils.getManufacturer()} ${DeviceUtils.getModel()}"
-        tv_version.text = version
+        val version =
+            "${AppUtils.getAppVersionName()}     Android ${DeviceUtils.getSDKVersionName()} ${DeviceUtils.getManufacturer()} ${DeviceUtils.getModel()}"
+        binding.tvVersion.text = version
         val workVersionName = AppUtils.getAppInfo(Constant.PACKAGE_NAMES)?.versionName
         when (workVersionName) {
             null -> {
                 LogUtils.e("系统检测到您尚未安装企业微信，请先安装企业微信")
-                tv_work_version.text = "检测到您尚未安装企业微信，请先安装登录!"
+                binding.tvWorkVersion.text = "检测到您尚未安装企业微信，请先安装登录!"
             }
+
             in Constant.AVAILABLE_VERSION -> {
                 LogUtils.i("当前企业微信版本已适配: $workVersionName")
                 val tip = "$workVersionName   已适配，可放心使用~"
-                tv_work_version.text = tip
+                binding.tvWorkVersion.text = tip
             }
+
             else -> {
                 LogUtils.e("当前企业微信版本未兼容: $workVersionName")
                 val tip = "$workVersionName   可能存在部分兼容性问题!"
-                tv_work_version.text = tip
+                binding.tvWorkVersion.text = tip
             }
         }
         SPUtils.getInstance().put("appVersion", version)
@@ -110,18 +116,18 @@ class ListenActivity : AppCompatActivity() {
     }
 
     private fun initAccessibility() {
-        sw_accessibility.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        binding.swAccessibility.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             LogUtils.i("sw_accessibility onCheckedChanged: $isChecked")
             if (isChecked) {
                 if (SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID).isNullOrBlank()) {
-                    sw_accessibility.isChecked = false
+                    binding.swAccessibility.isChecked = false
                     ToastUtils.showLong("请先填写并保存链接号~")
                 } else if (!PermissionHelper.isAccessibilitySettingOn()) {
                     openAccessibility()
                 }
             } else {
                 if (PermissionHelper.isAccessibilitySettingOn()) {
-                    sw_accessibility.isChecked = true
+                    binding.swAccessibility.isChecked = true
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                     startActivity(intent)
                 }
@@ -130,7 +136,7 @@ class ListenActivity : AppCompatActivity() {
     }
 
     private fun initOverlays() {
-        sw_overlay.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+        binding.swOverlay.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             LogUtils.i("sw_overlay onCheckedChanged: $isChecked")
             if (isChecked) {
                 if (!PermissionUtils.isGrantedDrawOverlays()) {
@@ -140,12 +146,14 @@ class ListenActivity : AppCompatActivity() {
                             PermissionPageManagement.goToSetting(this@ListenActivity)
                         }
 
-                        override fun onDenied() { sw_accessibility.isChecked = false }
+                        override fun onDenied() {
+                            binding.swAccessibility.isChecked = false
+                        }
                     })
                 }
             } else {
                 if (PermissionUtils.isGrantedDrawOverlays()) {
-                    sw_overlay.isChecked = true
+                    binding.swOverlay.isChecked = true
                     PermissionPageManagement.goToSetting(this)
                 }
             }
@@ -160,7 +168,7 @@ class ListenActivity : AppCompatActivity() {
             DialogInterface.OnClickListener { dialog, which ->
                 freshOpenServiceSwitch(
                     WeworkService::class.java,
-                    sw_accessibility
+                    binding.swAccessibility
                 )
                 val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                 startActivity(intent)
@@ -168,13 +176,13 @@ class ListenActivity : AppCompatActivity() {
         val cancel = DialogInterface.OnCancelListener {
             freshOpenServiceSwitch(
                 WeworkService::class.java,
-                sw_accessibility
+                binding.swAccessibility
             )
         }
         val cancelListener = DialogInterface.OnClickListener { dialog, which ->
             freshOpenServiceSwitch(
                 WeworkService::class.java,
-                sw_accessibility
+                binding.swAccessibility
             )
         }
         val dialog: AlertDialog = AlertDialog.Builder(this)
@@ -207,14 +215,14 @@ class ListenActivity : AppCompatActivity() {
         val commentDialog = Dialog(this)
         commentDialog.setContentView(R.layout.dialog_input)
         val et: EditText = commentDialog.findViewById(R.id.body) as EditText
-        et.setText(tv_host.text)
+        et.setText(binding.tvHost.text)
         val okBtn: Button = commentDialog.findViewById(R.id.ok) as Button
         okBtn.setOnClickListener {
             val text = et.text.toString()
             if (text.isNotBlank()) {
                 if (text.matches("ws{1,2}://[^/]+.*".toRegex())) {
                     Constant.host = text
-                    tv_host.text = text
+                    binding.tvHost.text = text
                     HostTestHelper.test()
                     commentDialog.dismiss()
                 } else {
@@ -241,8 +249,8 @@ class ListenActivity : AppCompatActivity() {
                 .setNegativeButton("", null)
                 .setPositiveButton("", null)
         val show = positiveButton.show()
-        bt_save.postDelayed({ show.dismiss() }, 5000)
-        bt_save.postDelayed({
+        binding.btSave.postDelayed({ show.dismiss() }, 5000)
+        binding.btSave.postDelayed({
             packageManager.getLaunchIntentForPackage(Constant.PACKAGE_NAMES)?.apply {
                 this.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(this)

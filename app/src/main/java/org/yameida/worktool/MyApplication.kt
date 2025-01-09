@@ -6,20 +6,12 @@ import com.blankj.utilcode.util.GsonUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SPUtils
 import com.blankj.utilcode.util.Utils
-import com.efs.sdk.base.core.util.PackageUtil
 import com.google.gson.Gson
 import com.hjq.toast.ToastUtils
 import com.tendcloud.tenddata.TalkingDataSDK
-import com.umeng.commonsdk.UMConfigure
 import org.yameida.worktool.config.GlobalException
-import update.UpdateAppUtils
 
 class MyApplication : Application() {
-
-    //我改动了  01
-    //我又改动了 02
-    //我还改动了 03
-    //社工看  04
 
     companion object {
 
@@ -29,7 +21,7 @@ class MyApplication : Application() {
         fun launchIntent() {
             LogUtils.e("进入WorkTool APP~")
             val app = Utils.getApp()
-            app.packageManager.getLaunchIntentForPackage(PackageUtil.getPackageName(app))?.apply {
+            app.packageManager.getLaunchIntentForPackage("")?.apply {
                 this.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 app.startActivity(this)
             }
@@ -46,14 +38,12 @@ class MyApplication : Application() {
         //初始化友盟统计
         val key = "6284a3a3d024421570f97c3c"
         val channel = "main_channel"
-        UMConfigure.preInit(this, key, channel)
-        //判断是否同意隐私协议，uminit为1时为已经同意，直接初始化umsdk
-        if (SPUtils.getInstance().getString("uminit", "1") == "1") {
-            UMConfigure.init(this, key, channel, UMConfigure.DEVICE_TYPE_PHONE, "")
-        }
-        TalkingDataSDK.init(this, "80E9C84E39904DAFB28562910FF7C86C", "worktool_master", SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID));
-        //初始化自动更新
-        UpdateAppUtils.init(this)
+        TalkingDataSDK.init(
+            this,
+            "80E9C84E39904DAFB28562910FF7C86C",
+            "worktool_master",
+            SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID)
+        )
         //设置全局异常捕获重启
         Thread.setDefaultUncaughtExceptionHandler(GlobalException.getInstance())
     }
