@@ -22,6 +22,10 @@ import java.util.Random
  * 微信操作类
  */
 object WeiXinOperationImpl {
+    private val name = "Wisdom"
+    private var heartRemoveDuplicate = ""
+    private var signRemoveDuplicate = ""
+
 
     fun mainLoop() {
         while (true) {
@@ -32,12 +36,8 @@ object WeiXinOperationImpl {
                     sleep(2000)
                     AccessibilityUtil.findTextAndClick(getRoot(true), "微信")
                 } else {
-                    if (Calendar.getInstance().get(Calendar.MINUTE) % 5 == 0) {
-                        sendMsg(
-                            (!isCurrentTimeInRange(1) && !isCurrentTimeInRange(2) && !isCurrentTimeInRange(
-                                3
-                            )).toString()
-                        )/*发送心跳间隔时间*/
+                    if (Calendar.getInstance().get(Calendar.MINUTE) % 2 == 0) {
+                        sendMsg("")/*发送心跳间隔时间*/
                     }
 
                     if (isCurrentTimeInRange(1) && isSignTime(1)) {
@@ -57,9 +57,12 @@ object WeiXinOperationImpl {
     }
 
     fun toSign(type: Int) {
-        sendMsg("sign time===" + type)
+        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE).toString();
+        if (signRemoveDuplicate == currentMinute) return
+        signRemoveDuplicate = currentMinute
 
-        return;
+//        sendMsg("sign time===" + type)
+//        return;
 
         val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -109,9 +112,7 @@ object WeiXinOperationImpl {
     }
 
     fun postRequest(
-        url: String,
-        formData: Map<String, String>,
-        headers: Map<String, String>
+        url: String, formData: Map<String, String>, headers: Map<String, String>
     ) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
@@ -126,9 +127,7 @@ object WeiXinOperationImpl {
         val formBody = formBodyBuilder.build()
 
         // 构建请求
-        val requestBuilder = Request.Builder()
-            .url(url)
-            .post(formBody)
+        val requestBuilder = Request.Builder().url(url).post(formBody)
         // 添加 Headers
         headers.forEach { (key, value) ->
             requestBuilder.addHeader(key, value)
@@ -138,6 +137,7 @@ object WeiXinOperationImpl {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
+                sendMsg("@${name}" + " " + e.message.toString())
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -146,7 +146,7 @@ object WeiXinOperationImpl {
                         // 解析 JSON
                         val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
                         println("Response: $apiResponse")
-                        sendMsg(apiResponse.msg.toString())
+                        sendMsg("@${name}" + " " + apiResponse.msg.toString())
                     }
                 } else {
                     println("Request failed with code: ${response.code}")
@@ -180,17 +180,30 @@ object WeiXinOperationImpl {
             AccessibilityUtil.findTextAndClick(getRoot(true), "微信")
             sleep(15000)
         }
-        AccessibilityUtil.findTextAndClick(getRoot(), "Wisdom")
+        AccessibilityUtil.findTextAndClick(getRoot(), name)
         sleep(2000)
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE).toString();
         if (txt.isEmpty()) {
-            AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()))
+            if (heartRemoveDuplicate != currentMinute) {
+                val notTimeRange =
+                    !(!isCurrentTimeInRange(1) && !isCurrentTimeInRange(2) && !isCurrentTimeInRange(
+                        3
+                    ))
+                AccessibilityUtil.findTextInput(
+                    getRoot(), sdf.format(Date()) + notTimeRange.toString()
+                )
+                sleep(2000)
+                val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
+                if (result) {
+                    heartRemoveDuplicate = currentMinute
+                }
+            }
         } else {
             AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n\r" + txt)
+            sleep(2000)
+            val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
         }
-
-        sleep(2000)
-        AccessibilityUtil.findTextAndClick(getRoot(), "发送")
     }
 
 
@@ -222,7 +235,7 @@ object WeiXinOperationImpl {
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val DAY_OF_WEEK: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
 
-        if (currentMinute % (15 + type * 2 + DAY_OF_WEEK) == 0) return true
+        if (currentMinute % (15 + type * 2 + DAY_OF_WEEK) == 1) return true
         else return false
 
     }
@@ -230,7 +243,5 @@ object WeiXinOperationImpl {
 
 // 定义返回数据类，用于解析 JSON
 data class ApiResponse(
-    val code: Any,
-    val data: Any,
-    val msg: Any?
+    val code: Any, val data: Any, val msg: Any?
 )
