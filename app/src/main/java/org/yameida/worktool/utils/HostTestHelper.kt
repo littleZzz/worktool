@@ -19,7 +19,7 @@ object HostTestHelper {
         val s = OkHttpClient().newWebSocket(Request.Builder().url(Constant.getWsUrl()).build(),
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
-                    ToastUtils.showLong("链接: ${Constant.getWsUrl()}\nonOpen\n" + response.body())
+//                    ToastUtils.showLong("链接: ${Constant.getWsUrl()}\nonOpen\n" + response.body())
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
@@ -39,7 +39,7 @@ object HostTestHelper {
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
-                    ToastUtils.showLong("链接: ${Constant.getWsUrl()}\nonClosed\nresponse:${response?.body()} t:${t.message}")
+//                    ToastUtils.showLong("链接: ${Constant.getWsUrl()}\nonClosed\nresponse:${response?.body()} t:${t.message}")
                 }
             })
     }

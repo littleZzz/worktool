@@ -31,22 +31,24 @@ class WeworkService : AccessibilityService() {
         softKeyboardController.showMode = SHOW_MODE_HIDDEN
         WeworkController.weworkService = this
         //初始化长连接
-        initWebSocket()
+//        initWebSocket()
         //初始化消息处理器
         MyLooper.init()
         //开发者可以在这里添加测试代码 启动时调用一次
         Demo.test(AppUtils.isAppDebug())
 
+        WeiXinOperationImpl.mainLoop()//开启微信主循环
+
         //监听是否修改链接号并重新长连接
-        registerReceiver(object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (intent.getStringExtra("type") == "modify_channel") {
-                    LogUtils.e("更新channel")
-                    webSocketManager.close(1000, "modify_channel")
-                    initWebSocket()
-                }
-            }
-        }, IntentFilter(Constant.WEWORK_NOTIFY))
+//        registerReceiver(object : BroadcastReceiver() {
+//            override fun onReceive(context: Context, intent: Intent) {
+//                if (intent.getStringExtra("type") == "modify_channel") {
+//                    LogUtils.e("更新channel")
+//                    webSocketManager.close(1000, "modify_channel")
+//                    initWebSocket()
+//                }
+//            }
+//        }, IntentFilter(Constant.WEWORK_NOTIFY))
     }
 
     private fun initWebSocket() {
@@ -86,7 +88,7 @@ class WeworkService : AccessibilityService() {
             Log.e(TAG, "链接建立")
             val robotId = SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID, "")
             val appVersion = SPUtils.getInstance().getString("appVersion", "")
-            val workVersion= SPUtils.getInstance().getString("workVersion", "")
+            val workVersion = SPUtils.getInstance().getString("workVersion", "")
             log("链接建立: $robotId appVersion: $appVersion workVersion: $workVersion")
             LogUtils.i("设置自动跳转企业微信")
             sendBroadcast(true)

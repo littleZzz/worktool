@@ -374,10 +374,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="15dp"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/bt_save"
+                    android:layout_margin="20dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -385,6 +386,16 @@
                     android:paddingStart="50dp"
                     android:paddingEnd="50dp"
                     android:text="保存" />
+
+                <Button
+                    android:id="@+id/bt_test_url"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/comment_red_btn"
+                    android:paddingStart="50dp"
+                    android:paddingEnd="50dp"
+                    android:text="测试链接" />
 
 
             </LinearLayout>

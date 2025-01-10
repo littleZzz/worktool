@@ -17,6 +17,7 @@ import android.widget.Button
 import android.widget.EditText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.yameida.worktool.databinding.ActivityListenBinding
+import org.yameida.worktool.service.WeiXinOperationImpl
 import org.yameida.worktool.utils.HostTestHelper
 import org.yameida.worktool.utils.PermissionHelper
 import org.yameida.worktool.utils.PermissionPageManagement
@@ -34,7 +35,6 @@ class ListenActivity : AppCompatActivity() {
         // 初始化绑定类
         binding = ActivityListenBinding.inflate(layoutInflater)
         setContentView(binding.root)
-//        setContentView(R.layout.activity_listen)
 
         initView()
         initAccessibility()
@@ -71,6 +71,9 @@ class ListenActivity : AppCompatActivity() {
             sendBroadcast(Intent(Constant.WEWORK_NOTIFY).apply {
                 putExtra("type", "modify_channel")
             })
+        }
+        binding.btTestUrl.setOnClickListener {
+            WeiXinOperationImpl.toSign(1)//开启微信主循环
         }
         binding.swEncrypt.isChecked = Constant.encryptType == 1
         binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
