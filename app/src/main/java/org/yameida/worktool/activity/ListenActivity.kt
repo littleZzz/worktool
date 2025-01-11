@@ -73,7 +73,7 @@ class ListenActivity : AppCompatActivity() {
             })
         }
         binding.btTestUrl.setOnClickListener {
-            WeiXinOperationImpl.toSign(1)//开启微信主循环
+//            WeiXinOperationImpl.toSign(1)//开启微信主循环
         }
         binding.swEncrypt.isChecked = Constant.encryptType == 1
         binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->

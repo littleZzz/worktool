@@ -1,5 +1,6 @@
 package org.yameida.worktool.service
 
+import android.annotation.SuppressLint
 import com.blankj.utilcode.util.*
 import com.google.gson.Gson
 import okhttp3.Call
@@ -12,6 +13,7 @@ import org.yameida.worktool.Constant
 import org.yameida.worktool.utils.*
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -21,6 +23,7 @@ import java.util.Random
 /**
  * 微信操作类
  */
+@SuppressLint("NewApi")
 object WeiXinOperationImpl {
     private val name = "Wisdom"
     private var heartRemoveDuplicate = ""
@@ -32,11 +35,9 @@ object WeiXinOperationImpl {
             try {
                 sleep(5000)
                 if (!isWeiXin()) {
-                    AccessibilityUtil.globalGoHome(WeworkController.weworkService)
-                    sleep(2000)
-                    AccessibilityUtil.findTextAndClick(getRoot(true), "微信")
+                    goWeiXin()
                 } else {
-                    if (Calendar.getInstance().get(Calendar.MINUTE) % 2 == 0) {
+                    if ((LocalTime.now().minute) % 6 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
@@ -57,12 +58,12 @@ object WeiXinOperationImpl {
     }
 
     fun toSign(type: Int) {
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE).toString();
+        val currentMinute = LocalTime.now().minute.toString();
         if (signRemoveDuplicate == currentMinute) return
         signRemoveDuplicate = currentMinute
 
 //        sendMsg("sign time===" + type)
-//        return;
+//        return
 
         val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -137,7 +138,7 @@ object WeiXinOperationImpl {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                sendMsg("@${name}" + " " + e.message.toString())
+                sendMsg("@${name}  " + e.message.toString())
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -146,7 +147,7 @@ object WeiXinOperationImpl {
                         // 解析 JSON
                         val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
                         println("Response: $apiResponse")
-                        sendMsg("@${name}" + " " + apiResponse.msg.toString())
+                        sendMsg("@${name}  " + apiResponse.msg.toString())
                     }
                 } else {
                     println("Request failed with code: ${response.code}")
@@ -173,17 +174,25 @@ object WeiXinOperationImpl {
         }
     }
 
+    private fun goWeiXin() {
+        AccessibilityUtil.globalGoHome(WeworkController.weworkService)
+        sleep(5000)
+        val result = AccessibilityUtil.findTextAndClick(getRoot(true), "微信")
+        if (!result) {
+            sleep(5000)
+            AccessibilityUtil.performXYClick(WeworkController.weworkService, 110f, 200f)
+        }
+    }
+
     private fun sendMsg(txt: String) {
         if (!isWeiXin()) {
-            AccessibilityUtil.globalGoHome(WeworkController.weworkService)
-            sleep(5000)
-            AccessibilityUtil.findTextAndClick(getRoot(true), "微信")
-            sleep(15000)
+            goWeiXin()
+            sleep(8000)
         }
         AccessibilityUtil.findTextAndClick(getRoot(), name)
         sleep(2000)
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE).toString();
+        val currentMinute = LocalTime.now().minute.toString()
         if (txt.isEmpty()) {
             if (heartRemoveDuplicate != currentMinute) {
                 val notTimeRange =
@@ -235,7 +244,7 @@ object WeiXinOperationImpl {
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val DAY_OF_WEEK: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
 
-        if (currentMinute % (15 + type * 2 + DAY_OF_WEEK) == 1) return true
+        if (currentMinute > 20 && currentMinute % (15 + type * 2 + DAY_OF_WEEK) == 1) return true
         else return false
 
     }
