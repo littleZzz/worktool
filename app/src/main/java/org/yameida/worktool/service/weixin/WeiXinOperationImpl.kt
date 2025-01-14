@@ -27,6 +27,10 @@ import java.util.Locale
  */
 @SuppressLint("NewApi")
 object WeiXinOperationImpl {
+    //token
+    private val authorizationToken =
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
+    private val roomName = "A同行"
     private val name = "Wisdom"
     private var heartRemoveDuplicate = ""
     private var signRemoveDuplicate = ""
@@ -35,21 +39,21 @@ object WeiXinOperationImpl {
     fun mainLoop() {
         while (true) {
             try {
-                sleep(5000)
+                sleep(10000)
                 if (!isWeiXin()) {
                     goWeiXin()
+                } else if (!isRoom()) {
+                    goRoom()
                 } else {
-                    if ((LocalTime.now().minute) % 2 == 0) {
+                    if ((LocalTime.now().minute) % 5 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
                     if (isCurrentTimeInRange(1) && isSignTime(1)) {
                         toSign(1)
-                    }
-                    if (isCurrentTimeInRange(2) && isSignTime(2)) {
+                    } else if (isCurrentTimeInRange(2) && isSignTime(2)) {
                         toSign(2)
-                    }
-                    if (isCurrentTimeInRange(3) && isSignTime(3)) {
+                    } else if (isCurrentTimeInRange(3) && isSignTime(3)) {
                         toSign(3)
                     }
                 }
@@ -57,105 +61,6 @@ object WeiXinOperationImpl {
             } finally {
             }
         }
-    }
-
-    fun toSign(type: Int) {
-        val currentMinute = LocalTime.now().minute.toString();
-        if (signRemoveDuplicate == currentMinute) return
-        signRemoveDuplicate = currentMinute
-
-//        sendMsg("sign time===" + type)
-//        return
-
-        val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        var ruleId: String = ""
-        var longitude: String = ""
-        var latitude: String = ""
-        var address: String = ""
-        if (type == 1) {
-            ruleId = "147"
-            longitude = "104.066444"
-            latitude = "30.769059"
-            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
-        } else if (type == 2) {
-            ruleId = "148"
-            longitude = "104.09778"
-            latitude = "30.653439"
-            address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
-        } else if (type == 3) {
-            ruleId = "149"
-            longitude = "104.067258"
-            latitude = "30.769958"
-            address = "中国四川省成都市新都区赵家寺路340号保利·春天花语"
-        }
-
-        if (ruleId.isEmpty() || longitude.isEmpty() || latitude.isEmpty() || address.isEmpty()) return
-
-        postRequest(
-            "http://1.14.111.130:9000/api/attendancemange",
-            mapOf(
-                "reportDate" to dateDay.format(Date()),//2025/01/10
-                "reportTime" to dateTime.format(Date()),//"10:54:34
-                "longitude" to longitude,
-                "latitude" to latitude,
-                "address" to address,
-                "orgId" to "49",
-                "jgbm" to "510114050001040004",
-                "personNum" to "5101142023040045",
-                "pmId" to "0",
-                "reportType" to "0",
-                "ruleId" to ruleId,
-                "addressType" to "0",
-            ),
-            mapOf(
-                "Authorization" to "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo",
-            ),
-        )
-    }
-
-    fun postRequest(
-        url: String, formData: Map<String, String>, headers: Map<String, String>
-    ) {
-        // 创建 OkHttpClient
-        val client = OkHttpClient()
-        // 构建请求体（JSON 格式）
-        val gson = Gson()
-
-        // 构建 FormBody
-        val formBodyBuilder = FormBody.Builder()
-        formData.forEach { (key, value) ->
-            formBodyBuilder.add(key, value)
-        }
-        val formBody = formBodyBuilder.build()
-
-        // 构建请求
-        val requestBuilder = Request.Builder().url(url).post(formBody)
-        // 添加 Headers
-        headers.forEach { (key, value) ->
-            requestBuilder.addHeader(key, value)
-        }
-        val request = requestBuilder.build()
-        // 执行请求
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                println("Request failed: ${e.message}")
-                sendMsg("@${name}  " + e.message.toString())
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    response.body?.string()?.let { responseBody ->
-                        // 解析 JSON
-                        val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
-                        println("Response: $apiResponse")
-                        sendMsg("@${name}  " + apiResponse.msg.toString())
-                    }
-                } else {
-                    println("Request failed with code: ${response.code}")
-                }
-            }
-        })
     }
 
     private fun isWeiXin(): Boolean {
@@ -176,6 +81,31 @@ object WeiXinOperationImpl {
         }
     }
 
+    ///是否在指定房间
+    private fun isRoom(): Boolean {
+        while (true) {
+            val tempRoot = WeworkController.weworkService.rootInActiveWindow
+            val root = WeworkController.weworkService.rootInActiveWindow
+            if (tempRoot != root) {
+                LogUtils.e("tempRoot != root")
+            } else if (root != null) {
+                if (AccessibilityUtil.findOneByText(root, "$roomName(10)") != null) {
+                    return true
+                } else {
+                    LogUtils.e("当前在指定room: ${root.packageName}")
+                    return false
+                }
+            }
+            sleep(1000)
+        }
+    }
+
+    private fun goRoom() {
+        sleep(5000)
+        val result = AccessibilityUtil.findTextAndClick(getRoot(true), roomName)
+        LogUtils.e("进入指定room: $result")
+    }
+
     private fun goWeiXin() {
         AccessibilityUtil.globalGoHome(WeworkController.weworkService)
         sleep(5000)
@@ -187,33 +117,38 @@ object WeiXinOperationImpl {
     }
 
     private fun sendMsg(txt: String) {
-        if (!isWeiXin()) {
-            goWeiXin()
-            sleep(8000)
-        }
-        AccessibilityUtil.findTextAndClick(getRoot(), name)
-        sleep(2000)
+        if (!isRoom()) return
+
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val currentMinute = LocalTime.now().minute.toString()
         if (txt.isEmpty()) {
+            val currentMinute = LocalTime.now().minute.toString()
             if (heartRemoveDuplicate != currentMinute) {
-                val notTimeRange =
+                val isNotTimeRange =
                     !(!isCurrentTimeInRange(1) && !isCurrentTimeInRange(2) && !isCurrentTimeInRange(
                         3
                     ))
-                AccessibilityUtil.findTextInput(
-                    getRoot(), sdf.format(Date()) + notTimeRange.toString()
+                val inputResult = AccessibilityUtil.findTextInput(
+                    getRoot(), sdf.format(Date()) + isNotTimeRange.toString()
                 )
                 sleep(2000)
                 val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
                 if (result) {
                     heartRemoveDuplicate = currentMinute
+                } else if (inputResult) {
+                    AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
+                    LogUtils.e("发送点击指定坐标: 650，1230")
+                    heartRemoveDuplicate = currentMinute
                 }
             }
         } else {
-            AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
+            val inputResult =
+                AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
             sleep(2000)
             val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
+            if (!result && inputResult) {
+                AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
+                LogUtils.e("发送点击指定坐标: 650，1230")
+            }
         }
     }
 
@@ -248,11 +183,193 @@ object WeiXinOperationImpl {
 
         if (currentMinute > 20 && currentMinute % (15 + type * 2 + dayOfWeek) == 1) return true
         else return false
+    }
 
+    fun toSign(type: Int) {
+        val currentMinute = LocalTime.now().minute.toString();
+        if (signRemoveDuplicate == currentMinute) return
+        signRemoveDuplicate = currentMinute
+
+//        sendMsg("sign time===" + type)
+//        return
+
+        val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        var ruleId: String = ""
+        var longitude: String = ""
+        var latitude: String = ""
+        var address: String = ""
+        if (type == 1) {
+            ruleId = "147"
+            longitude = "104.066444"
+            latitude = "30.769059"
+            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+        } else if (type == 2) {
+            ruleId = "148"
+            longitude = "104.09778"
+            latitude = "30.653439"
+            address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+        } else if (type == 3) {
+            ruleId = "149"
+            longitude = "104.066444"
+            latitude = "30.769059"
+            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+        }
+
+        if (ruleId.isEmpty() || longitude.isEmpty() || latitude.isEmpty() || address.isEmpty()) return
+
+        postToSign(
+            "http://1.14.111.130:9000/api/attendancemange",
+            mapOf(
+                "reportDate" to dateDay.format(Date()),//2025/01/10
+                "reportTime" to dateTime.format(Date()),//"10:54:34
+                "longitude" to longitude,
+                "latitude" to latitude,
+                "address" to address,
+                "orgId" to "49",
+                "jgbm" to "510114050001040004",
+                "personNum" to "5101142023040045",
+                "pmId" to "0",
+                "reportType" to "0",
+                "ruleId" to ruleId,
+                "addressType" to "0",
+            ),
+            mapOf(
+                "Authorization" to authorizationToken,
+            ),
+        )
+    }
+
+    //签到请求
+    fun postToSign(
+        url: String, formData: Map<String, String>, headers: Map<String, String>
+    ) {
+        // 创建 OkHttpClient
+        val client = OkHttpClient()
+        // 构建请求体（JSON 格式）
+        val gson = Gson()
+
+        // 构建 FormBody
+        val formBodyBuilder = FormBody.Builder()
+        formData.forEach { (key, value) ->
+            formBodyBuilder.add(key, value)
+        }
+        val formBody = formBodyBuilder.build()
+
+        // 构建请求
+        val requestBuilder = Request.Builder().url(url).post(formBody)
+        // 添加 Headers
+        headers.forEach { (key, value) ->
+            requestBuilder.addHeader(key, value)
+        }
+        val request = requestBuilder.build()
+        // 执行请求
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                println("Request failed: ${e.message}")
+                sendMsg("@${name} " + e.message.toString())
+                sleep(2000)
+                postToSignList()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body?.string()?.let { responseBody ->
+                        // 解析 JSON
+                        val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
+                        println("Response: $apiResponse")
+                        sendMsg("@${name} " + apiResponse.msg.toString())
+                        sleep(2000)
+                        postToSignList()
+                    }
+                } else {
+                    println("Request failed with code: ${response.code}")
+                }
+            }
+        })
+    }
+
+
+    //签到请求列表
+    fun postToSignList() {
+        // 创建 OkHttpClient
+        val client = OkHttpClient()
+        // 构建请求体（JSON 格式）
+        val gson = Gson()
+
+        // 构建 FormBody
+        val formBodyBuilder = FormBody.Builder()
+//        formData.forEach { (key, value) ->
+//            formBodyBuilder.add(key, value)
+//        }
+        val formBody = formBodyBuilder.build()
+
+        // 构建请求
+        val requestBuilder =
+            Request.Builder().url("http://1.14.111.130:9000/api/attendancemange/list")
+                .post(formBody)
+        // 添加 Headers
+        mapOf(
+            "Authorization" to authorizationToken,
+        ).forEach { (key, value) ->
+            requestBuilder.addHeader(key, value)
+        }
+        val request = requestBuilder.build()
+        // 执行请求
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                println("Request failed: ${e.message}")
+                sendMsg("@${name} " + e.message.toString())
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body?.string()?.let { responseBody ->
+                        try {
+                            val apiResponse = gson.fromJson(responseBody, SignList::class.java)
+                            println("Response: $apiResponse")
+                            var msg: String = ""
+                            apiResponse.data?.forEach { item ->
+                                msg += "${item.id}-${item.reportTime};  "
+                            }
+                            sendMsg("@${name} " + msg)
+                        } catch (e: Exception) {
+                        }
+                    }
+                } else {
+                    println("Request failed with code: ${response.code}")
+                }
+            }
+        })
     }
 }
 
 // 定义返回数据类，用于解析 JSON
 data class ApiResponse(
     val code: Any, val data: Any, val msg: Any?
+)
+
+//签到列表
+data class SignList(
+    val code: Int?, val data: List<DataItem>?, val count: Int?, val msg: String?
+)
+
+data class DataItem(
+    val id: Int?,
+    val sTime: String?,
+    val eTime: String?,
+    val endTime: String?,
+    val jgbm: String?,
+    val orgId: Int?,
+    val reportDate: String?,
+    val reportTime: String?,
+    val longitude: Double?,
+    val latitude: Double?,
+    val address: String?,
+    val personNum: String?,
+    val uuid: String?,
+    val reportType: Int?,
+    val ruleId: Int?,
+    val addressType: Int?,
+    val remark: String?
 )
