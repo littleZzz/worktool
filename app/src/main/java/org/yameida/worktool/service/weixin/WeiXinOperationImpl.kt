@@ -1,4 +1,4 @@
-package org.yameida.worktool.service
+package org.yameida.worktool.service.weixin
 
 import android.annotation.SuppressLint
 import com.blankj.utilcode.util.*
@@ -10,6 +10,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.yameida.worktool.Constant
+import org.yameida.worktool.service.WeworkController
+import org.yameida.worktool.service.getRoot
+import org.yameida.worktool.service.sleep
 import org.yameida.worktool.utils.*
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -17,7 +20,6 @@ import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.Random
 
 
 /**
@@ -37,7 +39,7 @@ object WeiXinOperationImpl {
                 if (!isWeiXin()) {
                     goWeiXin()
                 } else {
-                    if ((LocalTime.now().minute) % 6 == 0) {
+                    if ((LocalTime.now().minute) % 2 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
@@ -209,7 +211,7 @@ object WeiXinOperationImpl {
                 }
             }
         } else {
-            AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n\r" + txt)
+            AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
             sleep(2000)
             val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
         }
@@ -242,9 +244,9 @@ object WeiXinOperationImpl {
     private fun isSignTime(type: Int): Boolean {
         val calendar: Calendar = Calendar.getInstance()
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
-        val DAY_OF_WEEK: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
+        val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
 
-        if (currentMinute > 20 && currentMinute % (15 + type * 2 + DAY_OF_WEEK) == 1) return true
+        if (currentMinute > 20 && currentMinute % (15 + type * 2 + dayOfWeek) == 1) return true
         else return false
 
     }

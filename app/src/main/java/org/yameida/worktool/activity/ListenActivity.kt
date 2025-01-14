@@ -17,7 +17,6 @@ import android.widget.Button
 import android.widget.EditText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.yameida.worktool.databinding.ActivityListenBinding
-import org.yameida.worktool.service.WeiXinOperationImpl
 import org.yameida.worktool.utils.HostTestHelper
 import org.yameida.worktool.utils.PermissionHelper
 import org.yameida.worktool.utils.PermissionPageManagement

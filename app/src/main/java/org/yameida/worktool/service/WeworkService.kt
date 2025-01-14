@@ -1,10 +1,7 @@
 package org.yameida.worktool.service
 
 import android.accessibilityservice.AccessibilityService
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.blankj.utilcode.util.*
@@ -13,6 +10,7 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.yameida.worktool.Constant
 import org.yameida.worktool.Demo
+import org.yameida.worktool.service.weixin.WeiXinOperationImpl
 import org.yameida.worktool.utils.*
 import java.lang.Exception
 
