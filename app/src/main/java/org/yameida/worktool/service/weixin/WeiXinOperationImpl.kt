@@ -190,8 +190,6 @@ object WeiXinOperationImpl {
         if (signRemoveDuplicate == currentMinute) return
         signRemoveDuplicate = currentMinute
 
-//        sendMsg("sign time===" + type)
-//        return
 
         val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -297,17 +295,10 @@ object WeiXinOperationImpl {
         // 构建请求体（JSON 格式）
         val gson = Gson()
 
-        // 构建 FormBody
-        val formBodyBuilder = FormBody.Builder()
-//        formData.forEach { (key, value) ->
-//            formBodyBuilder.add(key, value)
-//        }
-        val formBody = formBodyBuilder.build()
-
         // 构建请求
         val requestBuilder =
             Request.Builder().url("http://1.14.111.130:9000/api/attendancemange/list")
-                .post(formBody)
+                .get()
         // 添加 Headers
         mapOf(
             "Authorization" to authorizationToken,
@@ -330,7 +321,7 @@ object WeiXinOperationImpl {
                             println("Response: $apiResponse")
                             var msg: String = ""
                             apiResponse.data?.forEach { item ->
-                                msg += "${item.id}-${item.reportTime};  "
+                                msg += "${item.id}=${item.reportTime};  "
                             }
                             sendMsg("@${name} " + msg)
                         } catch (e: Exception) {
