@@ -4,7 +4,7 @@ import com.blankj.utilcode.util.SPUtils
 
 object Constant {
 
-    val AVAILABLE_VERSION = arrayListOf("4.0.2", "4.0.6", "4.0.8", "4.0.10", "4.0.12", "4.0.16", "4.0.18", "4.0.19")
+    val AVAILABLE_VERSION = arrayListOf("4.0.2", "8.0.54")
     const val PACKAGE_NAMES = "com.tencent.mm"
     const val LISTEN_CHANNEL_ID = "LISTEN_CHANNEL_ID"
     const val WEWORK_NOTIFY = "wework_notify"
@@ -25,7 +25,8 @@ object Constant {
             SPUtils.getInstance().put("host", value)
         }
 
-    fun getWsUrl() = "$host/webserver/wework/" + SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID)
+    fun getWsUrl() =
+        "$host/webserver/wework/" + SPUtils.getInstance().getString(Constant.LISTEN_CHANNEL_ID)
 
     fun getCheckUpdateUrl() = "${getBaseUrl()}/appUpdate/checkUpdate"
 

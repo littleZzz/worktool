@@ -16,6 +16,8 @@ import org.yameida.worktool.service.sleep
 import org.yameida.worktool.utils.*
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
@@ -45,7 +47,7 @@ object WeiXinOperationImpl {
                 } else if (!isRoom()) {
                     goRoom()
                 } else {
-                    if ((LocalTime.now().minute) % 5 == 0) {
+                    if ((LocalTime.now().minute) % 10 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
@@ -181,8 +183,8 @@ object WeiXinOperationImpl {
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
 
-        if (currentMinute > 20 && currentMinute % (15 + type * 2 + dayOfWeek) == 1) return true
-        else return false
+        val baseValue = type * 2 + dayOfWeek
+        return currentMinute == baseValue || currentMinute == (30 + baseValue)
     }
 
     fun toSign(type: Int) {
@@ -206,7 +208,12 @@ object WeiXinOperationImpl {
             ruleId = "148"
             longitude = "104.09778"
             latitude = "30.653439"
-            address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+            val dayOfWeek = LocalDate.now().dayOfWeek
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+                address = "中国四川省成都市新都区赵家寺路340号保利·春天花语"
+            } else {
+                address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+            }
         } else if (type == 3) {
             ruleId = "149"
             longitude = "104.066444"
@@ -276,7 +283,7 @@ object WeiXinOperationImpl {
                         // 解析 JSON
                         val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
                         println("Response: $apiResponse")
-                        sendMsg("@${name} " + apiResponse.msg.toString())
+                        sendMsg("@ ${name} " + apiResponse.msg.toString())
                         sleep(2000)
                         postToSignList()
                     }
@@ -297,8 +304,7 @@ object WeiXinOperationImpl {
 
         // 构建请求
         val requestBuilder =
-            Request.Builder().url("http://1.14.111.130:9000/api/attendancemange/list")
-                .get()
+            Request.Builder().url("http://1.14.111.130:9000/api/attendancemange/list").get()
         // 添加 Headers
         mapOf(
             "Authorization" to authorizationToken,
@@ -321,9 +327,9 @@ object WeiXinOperationImpl {
                             println("Response: $apiResponse")
                             var msg: String = ""
                             apiResponse.data?.forEach { item ->
-                                msg += "${item.id}=${item.reportTime};  "
+                                msg += "\n${item.id}=${item.reportTime};"
                             }
-                            sendMsg("@${name} " + msg)
+                            sendMsg(" @ ${name} " + msg)
                         } catch (e: Exception) {
                         }
                     }
