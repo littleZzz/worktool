@@ -144,7 +144,7 @@ object WeiXinOperationImpl {
             }
         } else {
             val inputResult =
-                AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
+                AccessibilityUtil.findTextInput(getRoot(), txt + "\n" + sdf.format(Date()))
             sleep(2000)
             val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
             if (!result && inputResult) {

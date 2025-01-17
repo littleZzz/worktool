@@ -1,6 +1,7 @@
 package org.yameida.worktool
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import com.blankj.utilcode.util.GsonUtils
 import com.blankj.utilcode.util.LogUtils
@@ -26,10 +27,19 @@ class MyApplication : Application() {
                 app.startActivity(this)
             }
         }
+
+        private lateinit var instance: MyApplication
+
+        fun getContext(): Context {
+            return instance.applicationContext
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
+        instance = this // 保存 Application 实例
+
+
         //初始化工具类
         Utils.init(this)
         GsonUtils.setGsonDelegate(Gson())
