@@ -57,6 +57,8 @@ object WeiXinOperationImpl {
                         toSign(2)
                     } else if (isCurrentTimeInRange(3) && isSignTime(3)) {
                         toSign(3)
+                    } else if (isOtherSignTime()) {
+                        toOtherSign()//另一个
                     }
                 }
             } catch (e: Exception) {
@@ -175,6 +177,28 @@ object WeiXinOperationImpl {
             return currentTotalMinutes >= 7 * 60 && currentTotalMinutes <= 8 * 60 // 20:00 - 22:00
         }
         return false // 不在范围内
+    }
+
+    ///第二个app是否在签到时间段
+    private fun isOtherSignTime(): Boolean {
+        val calendar: Calendar = Calendar.getInstance()
+        val hour: Int = calendar.get(Calendar.HOUR_OF_DAY) // 获取当前分钟
+        val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
+        val minute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
+        val baseValue = dayOfWeek + 2
+
+        return (hour == 7 && minute == baseValue) || (hour == 22 && minute == baseValue)
+    }
+
+    ///另一个签到
+    fun toOtherSign() {
+        NetWorking.getOtherToken { result ->
+            if (result) {
+                sendMsg("另一个成功")
+            } else {
+                sendMsg("另一个失败")
+            }
+        }
     }
 
     ///是否是此时段签到时间

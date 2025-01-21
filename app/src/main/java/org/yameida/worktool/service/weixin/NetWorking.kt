@@ -28,7 +28,7 @@ object NetWorking {
 
     ///登录-上传图片-签到-save
     ///获取Other app  token
-    fun getOtherToken() {
+    fun getOtherToken(callback: (Boolean) -> Unit) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
         // 构建请求体（JSON 格式）
@@ -53,6 +53,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
+                callback(false)//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -64,7 +65,7 @@ object NetWorking {
                         val token = dataObject.get("token").asString
                         println("Token: $token")
                         //登录成功 上传图片
-                        otherUploadPic(token)
+                        otherUploadPic(token, callback)
                     }
                 } else {
                     println("Request failed with code: ${response.code}")
@@ -76,7 +77,7 @@ object NetWorking {
 
     ///上传图片
     @SuppressLint("ResourceType")
-    fun otherUploadPic(token: String) {
+    fun otherUploadPic(token: String, callback: (Boolean) -> Unit) {
         val gson = Gson()
         val imageByteArray =
             MyApplication.getContext().resources.openRawResource(R.drawable.upload).readBytes()
@@ -94,6 +95,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
+                callback(false)//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -104,7 +106,7 @@ object NetWorking {
                         val fileNane = jsonObject.get("data").toString()
                         println("fileNane: $fileNane")
                         //进行签到
-                        signOther(token, fileNane)
+                        signOther(token, fileNane, callback)
                     }
                 }
             }
@@ -112,7 +114,7 @@ object NetWorking {
     }
 
     ///进行签到
-    fun signOther(token: String, fileName: String) {
+    fun signOther(token: String, fileName: String, callback: (Boolean) -> Unit) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
         // 构建请求体（JSON 格式）
@@ -121,9 +123,9 @@ object NetWorking {
         val formBodyBuilder = FormBody.Builder()
         mapOf(
             "filename" to fileName,
-            "dwdz" to "中国四川省成都市成华区猛追湾街道望平美食区一环路东3段-56号",
-            "latitude" to "30.653438",
-            "longitude" to "104.097993",
+            "dwdz" to "中国四川省成都市新都区仁爱路152号欣茂·大峰景",
+            "latitude" to "30.769059",
+            "longitude" to "104.066444",
         ).forEach { (key, value) ->
             formBodyBuilder.add(key, value)
         }
@@ -137,6 +139,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
+                callback(false)//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -146,6 +149,7 @@ object NetWorking {
                         println("responseBody: $jsonObject")
                         val msg = jsonObject.get("msg").toString()
                         println("msg: $msg")
+                        callback(true)//回调
                         //保存
 //                        saveOther(token)
                     }
@@ -158,7 +162,7 @@ object NetWorking {
     }
 
     ///进行saveÏ
-    fun saveOther(token: String) {
+    fun saveOther(token: String, callback: (Boolean) -> Unit) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
         // 构建请求体（JSON 格式）
@@ -167,7 +171,7 @@ object NetWorking {
         val formBodyBuilder = FormBody.Builder()
         val pararm = mapOf(
             "sjly" to "3",
-            "address" to "中国四川省成都市成华区猛追湾街道望平美食区一环路东3段-56号",
+            "address" to "中国四川省成都市新都区仁爱路152号欣茂·大峰景",
             "imei" to "b5cb2e2e1cd4c21a647f19d49522ed793b476c596ab156fe",
             "lon" to "f2039b97bd41785e69b5e5c4919af0de",
             "time" to System.currentTimeMillis().toString(),
@@ -186,6 +190,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
+                callback(false)//回调
             }
 
             override fun onResponse(call: Call, response: Response) {

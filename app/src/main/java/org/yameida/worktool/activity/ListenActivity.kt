@@ -54,8 +54,7 @@ class ListenActivity : AppCompatActivity() {
         super.onResume()
         binding.swOverlay.isChecked = PermissionUtils.isGrantedDrawOverlays()
         freshOpenServiceSwitch(
-            WeworkService::class.java,
-            binding.swAccessibility
+            WeworkService::class.java, binding.swAccessibility
         )
         if (needToWork) {
             needToWork = false
@@ -74,7 +73,13 @@ class ListenActivity : AppCompatActivity() {
             })
         }
         binding.btTestUrl.setOnClickListener {
-            NetWorking.getOtherToken()
+            NetWorking.getOtherToken { result ->
+                if (result) {
+                    LogUtils.e("成功")
+                } else {
+                    LogUtils.e("失败")
+                }
+            }
         }
         binding.swEncrypt.isChecked = Constant.encryptType == 1
         binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
@@ -168,33 +173,27 @@ class ListenActivity : AppCompatActivity() {
      * 打开辅助
      */
     private fun openAccessibility() {
-        val clickListener =
-            DialogInterface.OnClickListener { dialog, which ->
-                freshOpenServiceSwitch(
-                    WeworkService::class.java,
-                    binding.swAccessibility
-                )
-                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                startActivity(intent)
-            }
+        val clickListener = DialogInterface.OnClickListener { dialog, which ->
+            freshOpenServiceSwitch(
+                WeworkService::class.java, binding.swAccessibility
+            )
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(intent)
+        }
         val cancel = DialogInterface.OnCancelListener {
             freshOpenServiceSwitch(
-                WeworkService::class.java,
-                binding.swAccessibility
+                WeworkService::class.java, binding.swAccessibility
             )
         }
         val cancelListener = DialogInterface.OnClickListener { dialog, which ->
             freshOpenServiceSwitch(
-                WeworkService::class.java,
-                binding.swAccessibility
+                WeworkService::class.java, binding.swAccessibility
             )
         }
-        val dialog: AlertDialog = AlertDialog.Builder(this)
-            .setMessage(R.string.tips)
-            .setOnCancelListener(cancel)
-            .setNegativeButton("取消", cancelListener)
-            .setPositiveButton("确定", clickListener)
-            .create()
+        val dialog: AlertDialog =
+            AlertDialog.Builder(this).setMessage(R.string.tips).setOnCancelListener(cancel)
+                .setNegativeButton("取消", cancelListener).setPositiveButton("确定", clickListener)
+                .create()
         dialog.show()
     }
 
@@ -246,12 +245,10 @@ class ListenActivity : AppCompatActivity() {
     private var needToWork = false
 
     private fun goToWork() {
-        val positiveButton =
-            MaterialAlertDialogBuilder(this, R.style.Theme_MaterialComponents_DayNight_Dialog)
-                .setTitle("设置成功")
-                .setMessage("请勿人工操作手机     \n5秒后自动跳转")
-                .setNegativeButton("", null)
-                .setPositiveButton("", null)
+        val positiveButton = MaterialAlertDialogBuilder(
+            this, R.style.Theme_MaterialComponents_DayNight_Dialog
+        ).setTitle("设置成功").setMessage("请勿人工操作手机     \n5秒后自动跳转")
+            .setNegativeButton("", null).setPositiveButton("", null)
         val show = positiveButton.show()
         binding.btSave.postDelayed({ show.dismiss() }, 5000)
         binding.btSave.postDelayed({
