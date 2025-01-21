@@ -183,7 +183,7 @@ object WeiXinOperationImpl {
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
 
-        val baseValue = type * 2 + dayOfWeek
+        val baseValue = dayOfWeek + 2
         return currentMinute == baseValue || currentMinute == (30 + baseValue)
     }
 

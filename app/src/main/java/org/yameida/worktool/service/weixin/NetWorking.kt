@@ -15,6 +15,7 @@ import okhttp3.Response
 import org.yameida.worktool.MyApplication
 import org.yameida.worktool.R
 import java.io.IOException
+import java.security.MessageDigest
 import java.time.LocalTime
 
 
@@ -146,7 +147,7 @@ object NetWorking {
                         val msg = jsonObject.get("msg").toString()
                         println("msg: $msg")
                         //保存
-                        saveOther(token)
+//                        saveOther(token)
                     }
                 } else {
                     println("Request failed with code: ${response.code}")
@@ -203,6 +204,21 @@ object NetWorking {
         })
 
     }
+
+    ///md5加密
+    fun md5Encryption(input: String): String {
+        val digest = MessageDigest.getInstance("MD5") // 获取 MD5 加密实例
+        val bytes = digest.digest(input.toByteArray()) // 获取输入字符串的字节数组，并进行加密
+
+        // 将加密后的字节数组转化为十六进制字符串
+        val stringBuilder = StringBuilder()
+        for (byte in bytes) {
+            stringBuilder.append(String.format("%02x", byte))
+        }
+
+        return stringBuilder.toString() // 返回 MD5 加密结果
+    }
+
 
 }
 
