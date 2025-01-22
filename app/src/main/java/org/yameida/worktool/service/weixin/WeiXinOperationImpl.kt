@@ -37,6 +37,25 @@ object WeiXinOperationImpl {
     private var heartRemoveDuplicate = ""
     private var signRemoveDuplicate = ""
     private var otherSignRemoveDuplicate = ""//另一个排重
+    private val holidayLists = listOf(
+        "1-28",
+        "1-29",
+        "1-30",
+        "1-31",
+        "2-3",
+        "2-4",
+        "4-5",
+        "5-1",
+        "5-2",
+        "5-5",
+        "6-2",
+        "10-1",
+        "10-2",
+        "10-3",
+        "10-6",
+        "10-7",
+        "10-8"
+    )
 
 
     fun mainLoop() {
@@ -238,9 +257,11 @@ object WeiXinOperationImpl {
             ruleId = "148"
             longitude = "104.09778"
             latitude = "30.653439"
-            val dayOfWeek = LocalDate.now().dayOfWeek
-            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
-                address = "中国四川省成都市新都区赵家寺路340号保利·春天花语"
+            val local = LocalDate.now()
+            val isHoliday = holidayLists.contains("${local.month.value}-${local.dayOfMonth}")
+            val dayOfWeek = local.dayOfWeek
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday) {
+                address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
             } else {
                 address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
             }
@@ -313,7 +334,7 @@ object WeiXinOperationImpl {
                         // 解析 JSON
                         val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
                         println("Response: $apiResponse")
-                        sendMsg("@ ${name} " + apiResponse.msg.toString())
+                        sendMsg("@${name} " + apiResponse.msg.toString())
                         sleep(2000)
                         postToSignList()
                     }
@@ -359,7 +380,7 @@ object WeiXinOperationImpl {
                             apiResponse.data?.forEach { item ->
                                 msg += "\n${item.id}=${item.reportTime};"
                             }
-                            sendMsg(" @ ${name} " + msg)
+                            sendMsg("@${name} 签到列表" + msg)
                         } catch (e: Exception) {
                         }
                     }
