@@ -74,7 +74,6 @@ object NetWorking {
         })
     }
 
-
     ///上传图片
     @SuppressLint("ResourceType")
     fun otherUploadPic(token: String, callback: (Boolean) -> Unit) {

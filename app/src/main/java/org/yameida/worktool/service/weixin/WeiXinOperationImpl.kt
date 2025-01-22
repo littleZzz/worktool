@@ -36,6 +36,7 @@ object WeiXinOperationImpl {
     private val name = "Wisdom"
     private var heartRemoveDuplicate = ""
     private var signRemoveDuplicate = ""
+    private var otherSignRemoveDuplicate = ""//另一个排重
 
 
     fun mainLoop() {
@@ -192,10 +193,15 @@ object WeiXinOperationImpl {
 
     ///另一个签到
     fun toOtherSign() {
+        val currentMinute = LocalTime.now().minute.toString()
+        if (otherSignRemoveDuplicate == currentMinute) return
+        otherSignRemoveDuplicate = currentMinute
         NetWorking.getOtherToken { result ->
             if (result) {
+                otherSignRemoveDuplicate = LocalTime.now().minute.toString()
                 sendMsg("另一个成功")
             } else {
+                otherSignRemoveDuplicate = LocalTime.now().minute.toString()
                 sendMsg("另一个失败")
             }
         }
@@ -212,7 +218,7 @@ object WeiXinOperationImpl {
     }
 
     fun toSign(type: Int) {
-        val currentMinute = LocalTime.now().minute.toString();
+        val currentMinute = LocalTime.now().minute.toString()
         if (signRemoveDuplicate == currentMinute) return
         signRemoveDuplicate = currentMinute
 
