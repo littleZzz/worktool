@@ -166,7 +166,7 @@ object WeiXinOperationImpl {
             }
         } else {
             val inputResult =
-                AccessibilityUtil.findTextInput(getRoot(), txt + "\n" + sdf.format(Date()))
+                AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
             sleep(2000)
             val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
             if (!result && inputResult) {
@@ -218,10 +218,10 @@ object WeiXinOperationImpl {
         NetWorking.getOtherToken { result ->
             if (result) {
                 otherSignRemoveDuplicate = LocalTime.now().minute.toString()
-                sendMsg("另一个成功")
+                sendMsg("@${name}  另一个成功")
             } else {
                 otherSignRemoveDuplicate = LocalTime.now().minute.toString()
-                sendMsg("另一个失败")
+                sendMsg("@${name}  另一个失败")
             }
         }
     }
