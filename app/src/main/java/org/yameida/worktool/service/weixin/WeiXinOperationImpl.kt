@@ -232,7 +232,11 @@ object WeiXinOperationImpl {
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
 
-        val baseValue = dayOfWeek + 2
+        var baseValue = dayOfWeek + 4
+        if (type == 1) baseValue -= (1 + (dayOfWeek % 2))
+        else if (type == 2) baseValue += (1 + (dayOfWeek % 2))
+        else if (type == 3) baseValue -= (1 + (dayOfWeek % 3))
+
         return currentMinute == baseValue || currentMinute == (30 + baseValue)
     }
 
