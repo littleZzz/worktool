@@ -382,7 +382,8 @@ object WeiXinOperationImpl {
                             println("Response: $apiResponse")
                             var msg: String = ""
                             apiResponse.data?.forEach { item ->
-                                msg += "\n${item.id}=${item.reportTime};"
+                                val subStr = item.address?.substring(item.address.length - 6)
+                                msg += "\n${item.id}=${item.reportTime}--$subStr;"
                             }
                             sendMsg("@${name} 签到列表" + msg)
                         } catch (e: Exception) {
