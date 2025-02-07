@@ -81,6 +81,12 @@ class ListenActivity : AppCompatActivity() {
                 }
             }
         }
+        binding.btSignHome.setOnClickListener {
+            NetWorking.activeToSign(true)
+        }
+        binding.btSignBusy.setOnClickListener {
+            NetWorking.activeToSign(false)
+        }
         binding.swEncrypt.isChecked = Constant.encryptType == 1
         binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             LogUtils.i("sw_encrypt onCheckedChanged: $isChecked")

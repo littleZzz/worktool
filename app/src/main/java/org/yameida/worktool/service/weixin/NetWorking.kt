@@ -3,6 +3,7 @@ package org.yameida.worktool.service.weixin
 import android.annotation.SuppressLint
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.hjq.toast.ToastUtils
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -16,7 +17,10 @@ import org.yameida.worktool.MyApplication
 import org.yameida.worktool.R
 import java.io.IOException
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.time.LocalTime
+import java.util.Date
+import java.util.Locale
 
 
 /**
@@ -24,6 +28,11 @@ import java.time.LocalTime
  */
 @SuppressLint("NewApi")
 object NetWorking {
+
+
+    //token
+    private val authorizationToken =
+        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
 
 
     ///登录-上传图片-签到-save
@@ -223,6 +232,85 @@ object NetWorking {
         return stringBuilder.toString() // 返回 MD5 加密结果
     }
 
+
+    private var signRemoveDuplicate: String = ""//排重
+
+    //主动签到
+    fun activeToSign(isHome: Boolean) {
+        val currentMinute = LocalTime.now().minute.toString()
+
+        if (signRemoveDuplicate == currentMinute) {
+            ToastUtils.show("重复了")
+            return
+        }
+        signRemoveDuplicate = currentMinute
+
+        // 创建 OkHttpClient
+        val client = OkHttpClient()
+        // 构建请求体（JSON 格式
+        val gson = Gson()
+
+        // 构建 FormBody
+        val formBodyBuilder = FormBody.Builder()
+
+        val dateDay = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+
+        var longitude: String = ""
+        var latitude: String = ""
+        var address: String = ""
+        if (isHome) {
+            longitude = "104.066444"
+            latitude = "30.769059"
+            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+        } else {
+            longitude = "104.09778"
+            latitude = "30.653439"
+            address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+        }
+        val mapOf = mapOf(
+            "signDate" to dateDay.format(Date()),
+            "signTime" to dateTime.format(Date()),
+            "longitude" to longitude,
+            "latitude" to latitude,
+            "address" to address,
+            "remark" to ".",
+            "addressType" to "0",
+        )
+
+        mapOf.forEach { (key, value) ->
+            formBodyBuilder.add(key, value)
+        }
+        val formBody = formBodyBuilder.build()
+
+        // 构建请求
+        val requestBuilder =
+            Request.Builder().url("http://1.14.111.130:9000/api/activeSign/add").post(formBody)
+        // 添加 Headers
+        requestBuilder.addHeader("Authorization", authorizationToken)
+        val request = requestBuilder.build()
+        // 执行请求
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                println("Request failed: ${e.message}")
+                ToastUtils.show("失败了")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    response.body?.string()?.let { responseBody ->
+                        // 解析 JSON
+                        val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
+                        println("Response: $apiResponse")
+                        ToastUtils.show("成功了")
+                    }
+                } else {
+                    println("Request failed with code: ${response.code}")
+                    ToastUtils.show("失败了")
+                }
+            }
+        })
+    }
 
 }
 
