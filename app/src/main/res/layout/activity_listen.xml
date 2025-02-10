@@ -77,10 +77,10 @@
 
                 <TextView
                     android:id="@+id/bt_signHome"
-                    android:layout_marginLeft="40dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="40dp"
                     android:background="@drawable/comment_red_btn"
                     android:paddingStart="20dp"
                     android:paddingEnd="20dp"
@@ -88,16 +88,25 @@
 
                 <TextView
                     android:id="@+id/bt_signBusy"
-                    android:layout_marginLeft="20dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="20dp"
                     android:background="@drawable/comment_red_btn"
                     android:paddingStart="20dp"
                     android:paddingEnd="20dp"
                     android:text="主动公" />
 
-
+                <TextView
+                    android:id="@+id/bt_signList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="20dp"
+                    android:background="@drawable/comment_red_btn"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:text="列表" />
             </LinearLayout>
 
             <TextView

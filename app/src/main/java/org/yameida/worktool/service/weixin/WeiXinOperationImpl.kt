@@ -351,7 +351,7 @@ object WeiXinOperationImpl {
 
 
     //签到请求列表
-    fun postToSignList() {
+    fun postToSignList(isToast: Boolean = false) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
         // 构建请求体（JSON 格式）
@@ -371,7 +371,8 @@ object WeiXinOperationImpl {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                sendMsg("@${name} " + e.message.toString())
+                if (isToast) ToastUtils.showLong("${e.message}")
+                else sendMsg("@${name} " + e.message.toString())
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -385,11 +386,13 @@ object WeiXinOperationImpl {
                                 val subStr = item.address?.substring(item.address.length - 6)
                                 msg += "\n${item.id}=${item.reportTime}--$subStr;"
                             }
-                            sendMsg("@${name} 签到列表" + msg)
+                            if (isToast) ToastUtils.showLong(msg)
+                            else sendMsg("@${name} 签到列表" + msg)
                         } catch (e: Exception) {
                         }
                     }
                 } else {
+                    if (isToast) ToastUtils.showLong("${response.code}")
                     println("Request failed with code: ${response.code}")
                 }
             }

@@ -87,6 +87,9 @@ class ListenActivity : AppCompatActivity() {
         binding.btSignBusy.setOnClickListener {
             NetWorking.activeToSign(false)
         }
+        binding.btSignList.setOnClickListener {
+            WeiXinOperationImpl.postToSignList(true)
+        }
         binding.swEncrypt.isChecked = Constant.encryptType == 1
         binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
             LogUtils.i("sw_encrypt onCheckedChanged: $isChecked")
