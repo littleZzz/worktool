@@ -81,12 +81,12 @@ class ListenActivity : AppCompatActivity() {
                 }
             }
         }
-        binding.btSignHome.setOnClickListener {
-            NetWorking.activeToSign(true)
-        }
-        binding.btSignBusy.setOnClickListener {
-            NetWorking.activeToSign(false)
-        }
+//        binding.btSignHome.setOnClickListener {
+//            NetWorking.activeToSign(true)
+//        }
+//        binding.btSignBusy.setOnClickListener {
+//            NetWorking.activeToSign(false)
+//        }
         binding.btSignList.setOnClickListener {
             WeiXinOperationImpl.postToSignList(true)
         }
