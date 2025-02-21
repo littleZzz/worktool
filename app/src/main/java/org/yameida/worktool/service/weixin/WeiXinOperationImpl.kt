@@ -67,7 +67,7 @@ object WeiXinOperationImpl {
                 } else if (!isRoom()) {
                     goRoom()
                 } else {
-                    if ((LocalTime.now().minute) % 10 == 0) {
+                    if ((LocalTime.now().minute) % 20 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
@@ -77,7 +77,9 @@ object WeiXinOperationImpl {
                         toSign(2)
                     } else if (isCurrentTimeInRange(3) && isSignTime(3)) {
                         toSign(3)
-                    } else if (isOtherSignTime()) {
+                    }
+
+                    if (isOtherSignTime()) {
                         toOtherSign()//另一个
                     }
                 }
@@ -205,9 +207,10 @@ object WeiXinOperationImpl {
         val hour: Int = calendar.get(Calendar.HOUR_OF_DAY) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
         val minute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
-        val baseValue = dayOfWeek + 2
+        val baseValue = dayOfWeek + 13
 
-        return (hour == 7 && minute == baseValue) || (hour == 22 && minute == baseValue)
+        return (hour == 7 && minute == baseValue) || (hour == 8 && minute == baseValue) || (hour == 20 && minute == baseValue) || (hour == 21 && minute == baseValue)
+
     }
 
     ///另一个签到
