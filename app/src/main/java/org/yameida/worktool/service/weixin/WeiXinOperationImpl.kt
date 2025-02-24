@@ -79,7 +79,7 @@ object WeiXinOperationImpl {
                         toSign(3)
                     }
 
-                    if (isOtherSignTime()) {
+                    if (isCurrentTimeInRange(4) && isOtherSignTime()) {
                         toOtherSign()//另一个
                     }
                 }
@@ -180,7 +180,7 @@ object WeiXinOperationImpl {
 
 
     // 判断当前时间是否在指定时间段内
-    private fun isCurrentTimeInRange(type: Int): Boolean {
+    fun isCurrentTimeInRange(type: Int): Boolean {
         // 获取当前时间
         val calendar: Calendar = Calendar.getInstance()
         val currentHour: Int = calendar.get(Calendar.HOUR_OF_DAY) // 获取当前小时（24小时制）
@@ -195,22 +195,21 @@ object WeiXinOperationImpl {
             return currentTotalMinutes >= 14 * 60 && currentTotalMinutes <= 16 * 60 // 14:00 - 16:00
         } else if (type == 3) {
             return currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 22 * 60 // 20:00 - 22:00
-        } else if (type == 4) {
-            return currentTotalMinutes >= 7 * 60 && currentTotalMinutes <= 8 * 60 // 20:00 - 22:00
+        } else if (type == 4) /*另一个的打卡时间*/ {
+            return (currentTotalMinutes >= 8 * 60 && currentTotalMinutes <= 9 * 60) || (currentTotalMinutes >= 14 * 60 && currentTotalMinutes <= 15 * 60) || (currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 21 * 60)
         }
         return false // 不在范围内
     }
 
     ///第二个app是否在签到时间段
-    private fun isOtherSignTime(): Boolean {
+    fun isOtherSignTime(): Boolean {
         val calendar: Calendar = Calendar.getInstance()
-        val hour: Int = calendar.get(Calendar.HOUR_OF_DAY) // 获取当前分钟
+        val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
-        val minute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
-        val baseValue = dayOfWeek + 13
 
-        return (hour == 7 && minute == baseValue) || (hour == 8 && minute == baseValue) || (hour == 20 && minute == baseValue) || (hour == 21 && minute == baseValue)
+        var baseValue = dayOfWeek + 14
 
+        return currentMinute == baseValue /*|| currentMinute == (10 + baseValue)*/
     }
 
     ///另一个签到
@@ -218,13 +217,13 @@ object WeiXinOperationImpl {
         val currentMinute = LocalTime.now().minute.toString()
         if (otherSignRemoveDuplicate == currentMinute) return
         otherSignRemoveDuplicate = currentMinute
-        NetWorking.getOtherToken { result ->
+        NetWorking.getOtherToken { result, address ->
             if (result) {
                 otherSignRemoveDuplicate = LocalTime.now().minute.toString()
-                sendMsg("@${name}  另一个成功")
+                sendMsg("@${name}  另一个成功：${address}")
             } else {
                 otherSignRemoveDuplicate = LocalTime.now().minute.toString()
-                sendMsg("@${name}  另一个失败")
+                sendMsg("@${name}  另一个失败：${address}")
             }
         }
     }

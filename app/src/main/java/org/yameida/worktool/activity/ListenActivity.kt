@@ -73,13 +73,14 @@ class ListenActivity : AppCompatActivity() {
             })
         }
         binding.btTestUrl.setOnClickListener {
-            NetWorking.getOtherToken { result ->
-                if (result) {
-                    LogUtils.e("成功")
-                } else {
-                    LogUtils.e("失败")
-                }
-            }
+            //另一个签到
+//            NetWorking.getOtherToken { result,address ->
+//                if (result) {
+//                    LogUtils.e("成功")
+//                } else {
+//                    LogUtils.e("失败")
+//                }
+//            }
         }
 //        binding.btSignHome.setOnClickListener {
 //            NetWorking.activeToSign(true)

@@ -15,6 +15,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.yameida.worktool.MyApplication
 import org.yameida.worktool.R
+import org.yameida.worktool.service.weixin.WeiXinOperationImpl.isCurrentTimeInRange
 import java.io.IOException
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -37,7 +38,7 @@ object NetWorking {
 
     ///登录-上传图片-签到-save
     ///获取Other app  token
-    fun getOtherToken(callback: (Boolean) -> Unit) {
+    fun getOtherToken(callback: (Boolean, String) -> Unit) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
         // 构建请求体（JSON 格式）
@@ -62,7 +63,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                callback(false)//回调
+                callback(false, "getOtherToken-无地址")//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -85,7 +86,7 @@ object NetWorking {
 
     ///上传图片
     @SuppressLint("ResourceType")
-    fun otherUploadPic(token: String, callback: (Boolean) -> Unit) {
+    fun otherUploadPic(token: String, callback: (Boolean, String) -> Unit) {
         val gson = Gson()
         val imageByteArray =
             MyApplication.getContext().resources.openRawResource(R.drawable.upload).readBytes()
@@ -103,7 +104,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
-                callback(false)//回调
+                callback(false, "otherUploadPic-无地址")//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -122,18 +123,31 @@ object NetWorking {
     }
 
     ///进行签到
-    fun signOther(token: String, fileName: String, callback: (Boolean) -> Unit) {
+    fun signOther(token: String, fileName: String, callback: (Boolean, String) -> Unit) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
         // 构建请求体（JSON 格式）
         val gson = Gson()
         // 构建 FormBody
         val formBodyBuilder = FormBody.Builder()
+
+        var longitude: String = ""
+        var latitude: String = ""
+        var address: String = ""
+        if (isCurrentTimeInRange(2)) {
+            longitude = "104.09778"
+            latitude = "30.653439"
+            address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+        } else {
+            longitude = "104.066444"
+            latitude = "30.769059"
+            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+        }
         mapOf(
             "filename" to fileName,
-            "dwdz" to "中国四川省成都市新都区仁爱路152号欣茂·大峰景",
-            "latitude" to "30.769059",
-            "longitude" to "104.066444",
+            "dwdz" to address,
+            "latitude" to latitude,
+            "longitude" to longitude,
         ).forEach { (key, value) ->
             formBodyBuilder.add(key, value)
         }
@@ -147,7 +161,8 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                callback(false)//回调
+                val subStr = address.substring(address.length - 6)
+                callback(false, subStr)//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -157,7 +172,8 @@ object NetWorking {
                         println("responseBody: $jsonObject")
                         val msg = jsonObject.get("msg").toString()
                         println("msg: $msg")
-                        callback(true)//回调
+                        val subStr = address.substring(address.length - 6)
+                        callback(true, subStr)//回调
                         //保存
 //                        saveOther(token)
                     }
