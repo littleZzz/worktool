@@ -196,7 +196,7 @@ object WeiXinOperationImpl {
         } else if (type == 3) {
             return currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 22 * 60 // 20:00 - 22:00
         } else if (type == 4) /*另一个的打卡时间*/ {
-            return (currentTotalMinutes >= 8 * 60 && currentTotalMinutes <= 9 * 60) || (currentTotalMinutes >= 14 * 60 && currentTotalMinutes <= 15 * 60) || (currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 21 * 60)
+            return (currentTotalMinutes >= 8 * 60 && currentTotalMinutes <= 9 * 60) || (currentTotalMinutes >= 14 * 60 && currentTotalMinutes <= 15 * 60) || (currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 21 * 60) || (currentTotalMinutes >= 21 * 60 && currentTotalMinutes <= 22 * 60)
         }
         return false // 不在范围内
     }
@@ -213,17 +213,21 @@ object WeiXinOperationImpl {
     }
 
     ///另一个签到
-    fun toOtherSign() {
-        val currentMinute = LocalTime.now().minute.toString()
-        if (otherSignRemoveDuplicate == currentMinute) return
-        otherSignRemoveDuplicate = currentMinute
+    private fun toOtherSign() {
+        val minute = LocalTime.now().minute.toString()
+        val hour = LocalTime.now().hour.toString()
+        val timeFlag = "$hour-$minute"
+        if (otherSignRemoveDuplicate == timeFlag) return
+        otherSignRemoveDuplicate = timeFlag
         NetWorking.getOtherToken { result, address ->
             if (result) {
-                otherSignRemoveDuplicate = LocalTime.now().minute.toString()
-                sendMsg("@${name}  另一个成功：${address}")
+                otherSignRemoveDuplicate =
+                    LocalTime.now().hour.toString() + "-" + LocalTime.now().minute.toString()
+                sendMsg("另一个成功：${address}")
             } else {
-                otherSignRemoveDuplicate = LocalTime.now().minute.toString()
-                sendMsg("@${name}  另一个失败：${address}")
+                otherSignRemoveDuplicate =
+                    LocalTime.now().hour.toString() + "-" + LocalTime.now().minute.toString()
+                sendMsg("另一个失败：${address}")
             }
         }
     }
