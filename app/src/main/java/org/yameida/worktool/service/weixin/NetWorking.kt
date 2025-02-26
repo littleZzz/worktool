@@ -15,10 +15,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.yameida.worktool.MyApplication
 import org.yameida.worktool.R
+import org.yameida.worktool.service.weixin.WeiXinOperationImpl.holidayLists
 import org.yameida.worktool.service.weixin.WeiXinOperationImpl.isCurrentTimeInRange
 import java.io.IOException
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Date
 import java.util.Locale
@@ -135,9 +138,18 @@ object NetWorking {
         var latitude: String = ""
         var address: String = ""
         if (isCurrentTimeInRange(2)) {
-            longitude = "104.09778"
-            latitude = "30.653439"
-            address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+            val local = LocalDate.now()
+            val isHoliday = holidayLists.contains("${local.month.value}-${local.dayOfMonth}")
+            val dayOfWeek = local.dayOfWeek
+            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday) {
+                longitude = "104.066444"
+                latitude = "30.769059"
+                address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+            } else {
+                longitude = "104.09778"
+                latitude = "30.653439"
+                address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+            }
         } else {
             longitude = "104.066444"
             latitude = "30.769059"

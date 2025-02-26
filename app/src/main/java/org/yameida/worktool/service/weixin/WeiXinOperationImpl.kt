@@ -37,7 +37,7 @@ object WeiXinOperationImpl {
     private var heartRemoveDuplicate = ""
     private var signRemoveDuplicate = ""
     private var otherSignRemoveDuplicate = ""//另一个排重
-    private val holidayLists = listOf(
+    val holidayLists = listOf(
         "1-28",
         "1-29",
         "1-30",
