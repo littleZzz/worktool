@@ -247,9 +247,11 @@ object WeiXinOperationImpl {
     }
 
     fun toSign(type: Int) {
-        val currentMinute = LocalTime.now().minute.toString()
-        if (signRemoveDuplicate == currentMinute) return
-        signRemoveDuplicate = currentMinute
+        val minute = LocalTime.now().minute.toString()
+        val hour = LocalTime.now().hour.toString()
+        val timeFlag = "$hour-$minute"
+        if (signRemoveDuplicate == timeFlag) return
+        signRemoveDuplicate = timeFlag
 
 
         val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
