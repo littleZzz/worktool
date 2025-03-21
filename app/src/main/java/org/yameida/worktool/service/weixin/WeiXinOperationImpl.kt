@@ -196,7 +196,7 @@ object WeiXinOperationImpl {
         } else if (type == 3) {
             return currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 22 * 60 // 20:00 - 22:00
         } else if (type == 4) /*另一个的打卡时间*/ {
-            return (currentTotalMinutes >= 8 * 60 && currentTotalMinutes <= 9 * 60) || (currentTotalMinutes >= 14 * 60 && currentTotalMinutes <= 15 * 60) || (currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 21 * 60) || (currentTotalMinutes >= 21 * 60 && currentTotalMinutes <= 22 * 60)
+            return (currentTotalMinutes >= 8 * 60 && currentTotalMinutes <= 9 * 60) || (currentTotalMinutes >= 14 * 60 && currentTotalMinutes <= 15 * 60) || (currentTotalMinutes >= 20 * 60 && currentTotalMinutes <= 21 * 60)
         }
         return false // 不在范围内
     }
