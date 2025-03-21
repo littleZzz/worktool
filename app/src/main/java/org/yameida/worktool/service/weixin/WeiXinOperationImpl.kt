@@ -67,7 +67,7 @@ object WeiXinOperationImpl {
                 } else if (!isRoom()) {
                     goRoom()
                 } else {
-                    if ((LocalTime.now().minute) % 20 == 0) {
+                    if ((LocalTime.now().minute) % 30 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
