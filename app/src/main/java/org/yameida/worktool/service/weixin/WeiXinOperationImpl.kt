@@ -170,8 +170,10 @@ object WeiXinOperationImpl {
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         if (txt.isEmpty()) {
-            val currentMinute = LocalTime.now().minute.toString()
-            if (heartRemoveDuplicate != currentMinute) {
+            val minute = LocalTime.now().minute.toString()
+            val hour = LocalTime.now().hour.toString()
+            val timeFlag = "$hour-$minute"
+            if (heartRemoveDuplicate != timeFlag) {
                 val isNotTimeRange =
                     !(!isCurrentTimeInRange(1) && !isCurrentTimeInRange(2) && !isCurrentTimeInRange(
                         3
@@ -182,11 +184,11 @@ object WeiXinOperationImpl {
                 sleep(2000)
                 val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
                 if (result) {
-                    heartRemoveDuplicate = currentMinute
+                    heartRemoveDuplicate = timeFlag
                 } else if (inputResult) {
                     AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
                     LogUtils.e("发送点击指定坐标: 650，1230")
-                    heartRemoveDuplicate = currentMinute
+                    heartRemoveDuplicate = timeFlag
                 }
             }
         } else {

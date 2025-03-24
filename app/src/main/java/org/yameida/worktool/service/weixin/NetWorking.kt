@@ -1,9 +1,9 @@
 package org.yameida.worktool.service.weixin
 
 import android.annotation.SuppressLint
+import com.blankj.utilcode.util.ToastUtils
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.hjq.toast.ToastUtils
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -176,8 +176,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                val subStr = address.substring(address.length - 6)
-                callback(false, subStr)//回调
+                callback(false, address.substring(address.length - 6))//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -270,8 +269,8 @@ object NetWorking {
     fun activeToSign(isHome: Boolean) {
         val currentMinute = LocalTime.now().minute.toString()
 
-        if (signRemoveDuplicate == currentMinute) {
-            ToastUtils.show("重复了")
+        if (signRemoveDuplicate.isNotEmpty()) {
+            ToastUtils.showLong("已操作过了,请不要重复操作，如需再次操作请重启应用")
             return
         }
         signRemoveDuplicate = currentMinute
@@ -324,7 +323,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                ToastUtils.show("失败了")
+                ToastUtils.showShort("失败了")
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -333,11 +332,11 @@ object NetWorking {
                         // 解析 JSON
                         val apiResponse = gson.fromJson(responseBody, ApiResponse::class.java)
                         println("Response: $apiResponse")
-                        ToastUtils.show("成功了")
+                        ToastUtils.showShort("成功了")
                     }
                 } else {
                     println("Request failed with code: ${response.code}")
-                    ToastUtils.show("失败了")
+                    ToastUtils.showShort("失败了")
                 }
             }
         })
