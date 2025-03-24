@@ -442,7 +442,7 @@ object WeiXinOperationImpl {
 
 // 定义返回数据类，用于解析 JSON
 data class ApiResponse(
-    val code: Any, val data: Any, val msg: Any?
+    val code: Int, val data: Any, val msg: Any?
 )
 
 //签到列表
