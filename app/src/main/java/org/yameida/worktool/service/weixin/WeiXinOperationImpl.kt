@@ -309,6 +309,7 @@ object WeiXinOperationImpl {
         if (ruleId.isEmpty() || longitude.isEmpty() || latitude.isEmpty() || address.isEmpty()) return
 
         postToSign(
+            type,
             "http://1.14.111.130:9000/api/attendancemange",
             mapOf(
                 "reportDate" to dateDay.format(Date()),//2025/01/10
@@ -332,7 +333,7 @@ object WeiXinOperationImpl {
 
     //签到请求
     fun postToSign(
-        url: String, formData: Map<String, String>, headers: Map<String, String>
+        type: Int, url: String, formData: Map<String, String>, headers: Map<String, String>
     ) {
         // 创建 OkHttpClient
         val client = OkHttpClient()
@@ -371,8 +372,15 @@ object WeiXinOperationImpl {
                         sendMsg("@${name} " + apiResponse.msg.toString())
                         sleep(2000)
                         postToSignList()
+                        if (apiResponse.code == 100 && "success" == apiResponse.msg.toString()) {
+                            val day: Int = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+                            signSuccess = "$day-$type"
+                        }
                     }
                 } else {
+                    sendMsg("@${name} 失败了 ${response.code}")
+                    sleep(2000)
+                    postToSignList()
                     println("Request failed with code: ${response.code}")
                 }
             }
