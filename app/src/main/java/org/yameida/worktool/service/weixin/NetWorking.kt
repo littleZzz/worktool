@@ -81,6 +81,7 @@ object NetWorking {
                         otherUploadPic(token, callback)
                     }
                 } else {
+                    callback(false, "getOtherToken-无地址")//回调
                     println("Request failed with code: ${response.code}")
                 }
             }
@@ -120,6 +121,8 @@ object NetWorking {
                         //进行签到
                         signOther(token, fileNane, callback)
                     }
+                } else {
+                    callback(false, "otherUploadPic-无地址")//回调
                 }
             }
         })
@@ -184,12 +187,12 @@ object NetWorking {
                         println("responseBody: $jsonObject")
                         val msg = jsonObject.get("msg").toString()
                         println("msg: $msg")
-                        val subStr = address.substring(address.length - 6)
-                        callback(true, subStr)//回调
+                        callback(true, address.substring(address.length - 6))//回调
                         //保存
 //                        saveOther(token)
                     }
                 } else {
+                    callback(false, address.substring(address.length - 6))//回调
                     println("Request failed with code: ${response.code}")
                 }
             }

@@ -34,9 +34,16 @@ object WeiXinOperationImpl {
         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
     private val roomName = "A同行"
     private val name = "Wisdom"
+
+    //同分钟内进行排重
     private var heartRemoveDuplicate = ""
     private var signRemoveDuplicate = ""
-    private var otherSignRemoveDuplicate = ""//另一个排重
+    private var otherSignRemoveDuplicate = ""
+
+    //记录时间段打卡是否成功 进行排重处理
+    private var signSuccess = ""
+    private var otherSignSuccess = ""
+
     val holidayLists = listOf(
         "1-28",
         "1-29",
@@ -67,7 +74,7 @@ object WeiXinOperationImpl {
                 } else if (!isRoom()) {
                     goRoom()
                 } else {
-                    if ((LocalTime.now().minute) % 30 == 0) {
+                    if ((LocalTime.now().minute) % 60 == 0) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
@@ -77,11 +84,14 @@ object WeiXinOperationImpl {
                         toSign(2)
                     } else if (isCurrentTimeInRange(3) && isSignTime(3)) {
                         toSign(3)
+                    } else if (isCurrentTimeInRange(1) && isSignTime(1, true)) {
+                        toOtherSign(1)//另一个
+                    } else if (isCurrentTimeInRange(2) && isSignTime(2, true)) {
+                        toOtherSign(2)//另一个
+                    } else if (isCurrentTimeInRange(3) && isSignTime(3, true)) {
+                        toOtherSign(3)//另一个
                     }
 
-                    if (isCurrentTimeInRange(4) && isOtherSignTime()) {
-                        toOtherSign()//另一个
-                    }
                 }
             } catch (e: Exception) {
             } finally {
@@ -139,6 +149,17 @@ object WeiXinOperationImpl {
         if (!result) {
             sleep(5000)
             AccessibilityUtil.performXYClick(WeworkController.weworkService, 110f, 200f)
+        }
+        sleep(15000)
+
+        //判断可能出现的异常 ANR、权限申请弹窗
+        if (AccessibilityUtil.findOneByText(getRoot(), "微信没有响应") != null) {
+            AccessibilityUtil.findTextAndClick(getRoot(), "关闭应用")
+        } else if (AccessibilityUtil.findOneByText(
+                getRoot(), "权限申请"
+            ) != null && AccessibilityUtil.findOneByText(getRoot(), "去设置") != null
+        ) {
+            AccessibilityUtil.findTextAndClick(getRoot(), "取消")
         }
     }
 
@@ -201,29 +222,24 @@ object WeiXinOperationImpl {
         return false // 不在范围内
     }
 
-    ///第二个app是否在签到时间段
-    fun isOtherSignTime(): Boolean {
-        val calendar: Calendar = Calendar.getInstance()
-        val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
-        val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
-
-        var baseValue = dayOfWeek + 14
-
-        return currentMinute == baseValue /*|| currentMinute == (10 + baseValue)*/
-    }
 
     ///另一个签到
-    private fun toOtherSign() {
+    private fun toOtherSign(type: Int) {
+
+        val day: Int = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        val successFlag = "$day-$type"
         val minute = LocalTime.now().minute.toString()
         val hour = LocalTime.now().hour.toString()
         val timeFlag = "$hour-$minute"
-        if (otherSignRemoveDuplicate == timeFlag) return
+
+        if (otherSignRemoveDuplicate == timeFlag || otherSignSuccess == successFlag) return
         otherSignRemoveDuplicate = timeFlag
         NetWorking.getOtherToken { result, address ->
             if (result) {
                 otherSignRemoveDuplicate =
                     LocalTime.now().hour.toString() + "-" + LocalTime.now().minute.toString()
                 sendMsg("另一个成功：${address}")
+                otherSignSuccess = "$day-$type"
             } else {
                 otherSignRemoveDuplicate =
                     LocalTime.now().hour.toString() + "-" + LocalTime.now().minute.toString()
@@ -233,7 +249,7 @@ object WeiXinOperationImpl {
     }
 
     ///是否是此时段签到时间
-    private fun isSignTime(type: Int): Boolean {
+    private fun isSignTime(type: Int, isOther: Boolean = false): Boolean {
         val calendar: Calendar = Calendar.getInstance()
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
@@ -243,14 +259,18 @@ object WeiXinOperationImpl {
         else if (type == 2) baseValue += (1 + (dayOfWeek % 2))
         else if (type == 3) baseValue -= (1 + (dayOfWeek % 3))
 
+        if (isOther) baseValue += 2
+
         return currentMinute == baseValue || currentMinute == (30 + baseValue)
     }
 
     fun toSign(type: Int) {
+        val day: Int = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        val successFlag = "$day-$type"
         val minute = LocalTime.now().minute.toString()
         val hour = LocalTime.now().hour.toString()
         val timeFlag = "$hour-$minute"
-        if (signRemoveDuplicate == timeFlag) return
+        if (signRemoveDuplicate == timeFlag || signSuccess == successFlag) return
         signRemoveDuplicate = timeFlag
 
 
