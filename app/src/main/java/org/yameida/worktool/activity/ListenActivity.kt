@@ -78,13 +78,28 @@ class ListenActivity : AppCompatActivity() {
             ToastUtils.showLong("$istTest")
         }
 //        binding.btSignHome.setOnClickListener {
-//            NetWorking.activeToSign(true)
+//            AlertDialog.Builder(this).setTitle(title).setMessage("请确认是否要打卡家里地址")
+//                .setPositiveButton("确认") { dialog, which ->
+//                    NetWorking.activeToSign(true)
+//                }.setNegativeButton("取消") { dialog, which ->
+//                    dialog.dismiss()
+//                }.create().show()
 //        }
 //        binding.btSignBusy.setOnClickListener {
-//            NetWorking.activeToSign(false)
+//            AlertDialog.Builder(this).setTitle(title).setMessage("请确认是否要打卡公司地址")
+//                .setPositiveButton("确认") { dialog, which ->
+//                    NetWorking.activeToSign(false)
+//                }.setNegativeButton("取消") { dialog, which ->
+//                    dialog.dismiss()
+//                }.create().show()
 //        }
         binding.btSignList.setOnClickListener {
-            WeiXinOperationImpl.postToSignList(true)
+            AlertDialog.Builder(this).setTitle(title).setMessage("请确认是否要获取签到列表")
+                .setPositiveButton("确认") { dialog, which ->
+                    WeiXinOperationImpl.postToSignList(true)
+                }.setNegativeButton("取消") { dialog, which ->
+                    dialog.dismiss()
+                }.create().show()
         }
         binding.swEncrypt.isChecked = Constant.encryptType == 1
         binding.swEncrypt.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
