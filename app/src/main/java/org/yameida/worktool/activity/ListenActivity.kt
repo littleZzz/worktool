@@ -19,6 +19,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.yameida.worktool.databinding.ActivityListenBinding
 import org.yameida.worktool.service.weixin.NetWorking
 import org.yameida.worktool.service.weixin.WeiXinOperationImpl
+import org.yameida.worktool.service.weixin.WeiXinOperationImpl.istTest
 import org.yameida.worktool.utils.HostTestHelper
 import org.yameida.worktool.utils.PermissionHelper
 import org.yameida.worktool.utils.PermissionPageManagement
@@ -73,14 +74,8 @@ class ListenActivity : AppCompatActivity() {
             })
         }
         binding.btTestUrl.setOnClickListener {
-            //另一个签到
-//            NetWorking.getOtherToken { result,address ->
-//                if (result) {
-//                    LogUtils.e("成功")
-//                } else {
-//                    LogUtils.e("失败")
-//                }
-//            }
+            istTest = !istTest
+            ToastUtils.showLong("$istTest")
         }
 //        binding.btSignHome.setOnClickListener {
 //            NetWorking.activeToSign(true)

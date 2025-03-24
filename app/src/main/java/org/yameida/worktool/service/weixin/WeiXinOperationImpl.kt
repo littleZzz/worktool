@@ -29,6 +29,8 @@ import java.util.Locale
  */
 @SuppressLint("NewApi")
 object WeiXinOperationImpl {
+    var istTest = false
+
     //token
     private val authorizationToken =
         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
@@ -74,7 +76,7 @@ object WeiXinOperationImpl {
                 } else if (!isRoom()) {
                     goRoom()
                 } else {
-                    if ((LocalTime.now().minute) % 60 == 0) {
+                    if ((LocalTime.now().minute) % 60 == 0 || istTest) {
                         sendMsg("")/*发送心跳间隔时间*/
                     }
 
@@ -93,7 +95,7 @@ object WeiXinOperationImpl {
                     }
 
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
             } finally {
             }
         }

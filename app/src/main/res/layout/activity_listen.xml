@@ -395,7 +395,7 @@
                     android:background="@drawable/comment_red_btn"
                     android:paddingStart="50dp"
                     android:paddingEnd="50dp"
-                    android:text="测试链接" />
+                    android:text="测试模式" />
 
 
             </LinearLayout>
