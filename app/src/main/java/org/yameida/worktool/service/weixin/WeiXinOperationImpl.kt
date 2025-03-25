@@ -291,14 +291,16 @@ object WeiXinOperationImpl {
             address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
         } else if (type == 2) {
             ruleId = "148"
-            longitude = "104.09778"
-            latitude = "30.653439"
             val local = LocalDate.now()
             val isHoliday = holidayLists.contains("${local.month.value}-${local.dayOfMonth}")
             val dayOfWeek = local.dayOfWeek
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday) {
+                longitude = "104.066444"
+                latitude = "30.769059"
                 address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
             } else {
+                longitude = "104.09778"
+                latitude = "30.653439"
                 address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
             }
         } else if (type == 3) {
