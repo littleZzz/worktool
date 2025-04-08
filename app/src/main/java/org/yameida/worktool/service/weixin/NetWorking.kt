@@ -17,6 +17,7 @@ import org.yameida.worktool.MyApplication
 import org.yameida.worktool.R
 import org.yameida.worktool.service.weixin.WeiXinOperationImpl.holidayLists
 import org.yameida.worktool.service.weixin.WeiXinOperationImpl.isCurrentTimeInRange
+import org.yameida.worktool.service.weixin.WeiXinOperationImpl.workDayLists
 import java.io.IOException
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -143,8 +144,9 @@ object NetWorking {
         if (isCurrentTimeInRange(2)) {
             val local = LocalDate.now()
             val isHoliday = holidayLists.contains("${local.month.value}-${local.dayOfMonth}")
+            val isWorkDay = workDayLists.contains("${local.month.value}-${local.dayOfMonth}")
             val dayOfWeek = local.dayOfWeek
-            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday) {
+            if (!isWorkDay && (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday)) {
                 longitude = "104.066444"
                 latitude = "30.769059"
                 address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"

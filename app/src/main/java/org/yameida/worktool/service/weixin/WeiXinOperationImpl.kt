@@ -46,6 +46,11 @@ object WeiXinOperationImpl {
     private var signSuccess = ""
     private var otherSignSuccess = ""
 
+    val workDayLists = listOf(
+        "4-27",
+        "9-28",
+        "10-11"
+    )
     val holidayLists = listOf(
         "1-28",
         "1-29",
@@ -293,8 +298,9 @@ object WeiXinOperationImpl {
             ruleId = "148"
             val local = LocalDate.now()
             val isHoliday = holidayLists.contains("${local.month.value}-${local.dayOfMonth}")
+            val isWorkDay = workDayLists.contains("${local.month.value}-${local.dayOfMonth}")
             val dayOfWeek = local.dayOfWeek
-            if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday) {
+            if (!isWorkDay && (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday)) {
                 longitude = "104.066444"
                 latitude = "30.769059"
                 address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
