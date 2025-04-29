@@ -23,7 +23,13 @@ import org.yameida.worktool.service.weixin.WeiXinOperationImpl.istTest
 import org.yameida.worktool.utils.HostTestHelper
 import org.yameida.worktool.utils.PermissionHelper
 import org.yameida.worktool.utils.PermissionPageManagement
-
+import android.widget.ListView
+import androidx.lifecycle.lifecycleScope
+import org.yameida.worktool.utils.ListViewManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ListenActivity : AppCompatActivity() {
 
@@ -57,10 +63,10 @@ class ListenActivity : AppCompatActivity() {
         freshOpenServiceSwitch(
             WeworkService::class.java, binding.swAccessibility
         )
-        if (needToWork) {
-            needToWork = false
-            goToWork()
-        }
+//        if (needToWork) {
+//            needToWork = false
+//            goToWork()
+//        }Ï
     }
 
     private fun initView() {
@@ -73,6 +79,18 @@ class ListenActivity : AppCompatActivity() {
                 putExtra("type", "modify_channel")
             })
         }
+
+        // Initialize ListView
+        val listView = findViewById<ListView>(R.id.list_view)
+        ListViewManager.init(listView)
+        // Add some sample data
+        ListViewManager.addItems(
+            listOf(
+                "Item 1", "Item 2", "Item 3", "Item 4", "Item 5",
+                "Item 6", "Item 7", "Item 8", "Item 9", "Item 10",
+            ).reversed()
+        )
+
         binding.btTestUrl.setOnClickListener {
             istTest = !istTest
             ToastUtils.showLong("$istTest")

@@ -4,10 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
-
-    <ScrollView
+    <!-- 固定高度的ListView容器 -->
+    <LinearLayout
+        android:id="@+id/list_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="300dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/background"
+        android:padding="0dp">
+
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="0dp"
+            android:divider="@color/color_999999"
+            android:dividerHeight="1dp"
+            android:padding="0dp" />
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/list_container">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,9 +84,7 @@
                         android:text="3.让本程序放在后台运行，点击进入企业微信保持手机不动屏幕常亮即可"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
-
                 </LinearLayout>
-
             </RelativeLayout>
 
             <TextView
@@ -112,7 +129,6 @@
                         android:text="127.0.0.1"
                         android:textColor="@color/color_999999"
                         android:textSize="@dimen/setting_end_font_size" />
-
                 </LinearLayout>
             </RelativeLayout>
 
@@ -146,7 +162,6 @@
                         android:text="1.0"
                         android:textColor="@color/color_999999"
                         android:textSize="@dimen/setting_end_font_size" />
-
                 </LinearLayout>
             </RelativeLayout>
 
@@ -180,7 +195,6 @@
                         android:text="4.0.2"
                         android:textColor="@color/color_999999"
                         android:textSize="@dimen/setting_end_font_size" />
-
                 </LinearLayout>
             </RelativeLayout>
 
@@ -265,9 +279,7 @@
                         android:text="开启主功能"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
-
                 </LinearLayout>
-
             </RelativeLayout>
 
             <RelativeLayout
@@ -300,9 +312,7 @@
                         android:text="开启通讯加密"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
-
                 </LinearLayout>
-
             </RelativeLayout>
 
             <RelativeLayout
@@ -335,9 +345,7 @@
                         android:text="开启新消息接收"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
-
                 </LinearLayout>
-
             </RelativeLayout>
 
             <RelativeLayout
@@ -370,9 +378,7 @@
                         android:text="开启悬浮窗权限"
                         android:textColor="@color/color_333333"
                         android:textSize="@dimen/setting_start_font_size" />
-
                 </LinearLayout>
-
             </RelativeLayout>
 
             <RelativeLayout
@@ -405,13 +411,12 @@
                         android:hint="请输入申请的链接号"
                         android:textColor="@color/color_999999"
                         android:textSize="@dimen/setting_end_font_size" />
-
                 </LinearLayout>
             </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:orientation="horizontal">
 
@@ -434,13 +439,8 @@
                     android:background="@drawable/comment_red_btn"
                     android:paddingStart="50dp"
                     android:paddingEnd="50dp"
-                    android:text="测试模式" />
-
-
+                    android:text="测试模式(心跳1分一次)" />
             </LinearLayout>
-
         </LinearLayout>
-
-    </ScrollView>
-
+    </androidx.core.widget.NestedScrollView>
 </RelativeLayout>

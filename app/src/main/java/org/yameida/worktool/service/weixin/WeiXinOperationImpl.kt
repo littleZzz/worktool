@@ -76,30 +76,31 @@ object WeiXinOperationImpl {
         while (true) {
             try {
                 sleep(10000)
-                if (!isWeiXin()) {
-                    goWeiXin()
-                } else if (!isRoom()) {
-                    goRoom()
-                } else {
-                    if ((LocalTime.now().minute) % 60 == 0 || istTest) {
-                        sendMsg("")/*发送心跳间隔时间*/
-                    }
+//                if (!isWeiXin()) {
+//                    goWeiXin()
+//                } else if (!isRoom()) {
+//                    goRoom()
+//                } else {
 
-                    if (isCurrentTimeInRange(1) && isSignTime(1)) {
-                        toSign(1)
-                    } else if (isCurrentTimeInRange(2) && isSignTime(2)) {
-                        toSign(2)
-                    } else if (isCurrentTimeInRange(3) && isSignTime(3)) {
-                        toSign(3)
-                    } else if (isCurrentTimeInRange(1) && isSignTime(1, true)) {
-                        toOtherSign(1)//另一个
-                    } else if (isCurrentTimeInRange(2) && isSignTime(2, true)) {
-                        toOtherSign(2)//另一个
-                    } else if (isCurrentTimeInRange(3) && isSignTime(3, true)) {
-                        toOtherSign(3)//另一个
-                    }
-
+                if ((LocalTime.now().minute) % 60 == 0 || istTest) {
+                    sendMsg("")/*发送心跳间隔时间*/
                 }
+
+                if (isCurrentTimeInRange(1) && isSignTime(1)) {
+                    toSign(1)
+                } else if (isCurrentTimeInRange(2) && isSignTime(2)) {
+                    toSign(2)
+                } else if (isCurrentTimeInRange(3) && isSignTime(3)) {
+                    toSign(3)
+                } else if (isCurrentTimeInRange(1) && isSignTime(1, true)) {
+                    toOtherSign(1)//另一个
+                } else if (isCurrentTimeInRange(2) && isSignTime(2, true)) {
+                    toOtherSign(2)//另一个
+                } else if (isCurrentTimeInRange(3) && isSignTime(3, true)) {
+                    toOtherSign(3)//另一个
+                }
+
+//                }
             } catch (_: Exception) {
             } finally {
             }
@@ -126,21 +127,22 @@ object WeiXinOperationImpl {
 
     ///是否在指定房间
     private fun isRoom(): Boolean {
-        while (true) {
-            val tempRoot = WeworkController.weworkService.rootInActiveWindow
-            val root = WeworkController.weworkService.rootInActiveWindow
-            if (tempRoot != root) {
-                LogUtils.e("tempRoot != root")
-            } else if (root != null) {
-                if (AccessibilityUtil.findOneByText(root, "$roomName(10)") != null) {
-                    return true
-                } else {
-                    LogUtils.e("当前在指定room: ${root.packageName}")
-                    return false
-                }
-            }
-            sleep(1000)
-        }
+        return true
+//        while (true) {
+//            val tempRoot = WeworkController.weworkService.rootInActiveWindow
+//            val root = WeworkController.weworkService.rootInActiveWindow
+//            if (tempRoot != root) {
+//                LogUtils.e("tempRoot != root")
+//            } else if (root != null) {
+//                if (AccessibilityUtil.findOneByText(root, "$roomName(10)") != null) {
+//                    return true
+//                } else {
+//                    LogUtils.e("当前在指定room: ${root.packageName}")
+//                    return false
+//                }
+//            }
+//            sleep(1000)
+//        }
     }
 
     private fun goRoom() {
@@ -183,28 +185,35 @@ object WeiXinOperationImpl {
                     !(!isCurrentTimeInRange(1) && !isCurrentTimeInRange(2) && !isCurrentTimeInRange(
                         3
                     ))
-                val inputResult = AccessibilityUtil.findTextInput(
-                    getRoot(), sdf.format(Date()) + isNotTimeRange.toString()
-                )
+                ListViewManager.addItem(sdf.format(Date()) + isNotTimeRange.toString())
+                heartRemoveDuplicate = timeFlag
                 sleep(2000)
-                val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
-                if (result) {
-                    heartRemoveDuplicate = timeFlag
-                } else if (inputResult) {
-                    AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
-                    LogUtils.e("发送点击指定坐标: 650，1230")
-                    heartRemoveDuplicate = timeFlag
-                }
+
+//                val inputResult = AccessibilityUtil.findTextInput(
+//                    getRoot(), sdf.format(Date()) + isNotTimeRange.toString()
+//                )
+//                sleep(2000)
+//                val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
+//                if (result) {
+//                    heartRemoveDuplicate = timeFlag
+//                } else if (inputResult) {
+//                    AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
+//                    LogUtils.e("发送点击指定坐标: 650，1230")
+//                    heartRemoveDuplicate = timeFlag
+//                }
             }
         } else {
-            val inputResult =
-                AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
+            ListViewManager.addItem(sdf.format(Date()) + "\n" + txt)
             sleep(2000)
-            val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
-            if (!result && inputResult) {
-                AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
-                LogUtils.e("发送点击指定坐标: 650，1230")
-            }
+
+//            val inputResult =
+//                AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
+//            sleep(2000)
+//            val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
+//            if (!result && inputResult) {
+//                AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
+//                LogUtils.e("发送点击指定坐标: 650，1230")
+//            }
         }
     }
 

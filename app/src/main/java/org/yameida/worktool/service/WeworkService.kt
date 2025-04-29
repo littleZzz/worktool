@@ -5,6 +5,9 @@ import android.content.Intent
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.blankj.utilcode.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
@@ -35,7 +38,14 @@ class WeworkService : AccessibilityService() {
         //开发者可以在这里添加测试代码 启动时调用一次
         Demo.test(AppUtils.isAppDebug())
 
-        WeiXinOperationImpl.mainLoop()//开启微信主循环
+        // 使用协程在后台运行主循环
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                WeiXinOperationImpl.mainLoop()
+            } catch (e: Exception) {
+                LogUtils.e("微信主循环异常: ${e.message}")
+            }
+        }
 
         //监听是否修改链接号并重新长连接
 //        registerReceiver(object : BroadcastReceiver() {
