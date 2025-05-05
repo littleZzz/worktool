@@ -34,15 +34,11 @@ object ListViewManager {
     fun addItem(item: String) {
         // 确保所有UI操作都在主线程执行
         android.os.Handler(android.os.Looper.getMainLooper()).post {
-            dataList.add(0, item)
-            adapter?.insert(item, 0)
+            dataList.add(item)
+            adapter?.add(item)
             adapter?.notifyDataSetChanged()
 
-            // 延迟一帧执行滚动，确保列表已经更新
-            listView?.postDelayed({
-                listView?.setSelection(0)
-                listView?.smoothScrollToPosition(0)
-            }, 16) // 16ms 约等于一帧的时间
+            scrollToBottom()
         }
     }
 
@@ -71,7 +67,8 @@ object ListViewManager {
 
     // 修改后的滚动到底部方法
     private fun scrollToBottom() {
-        listView?.post {
+        // 延迟一帧执行滚动，确保列表已经更新
+        listView?.postDelayed({
             try {
                 val count = adapter?.count ?: 0
                 if (count > 0) {
@@ -87,7 +84,7 @@ object ListViewManager {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
+        }, 16) // 16ms 约等于一帧的时间
     }
 
     // 新增滚动到顶部的方法
@@ -101,8 +98,4 @@ object ListViewManager {
         }
     }
 
-    // 供外部调用的强制滚动方法
-    fun forceScrollToBottom() {
-        scrollToBottom()
-    }
 }
