@@ -270,7 +270,7 @@ object WeiXinOperationImpl {
     private fun isSignTime(type: Int, isOther: Boolean = false): Boolean {
         val calendar: Calendar = Calendar.getInstance()
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
-        val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_WEEK) // 获取周几
+        val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_MONTH) % 8 // 获取周几
 
         var baseValue = dayOfWeek + 4
         if (type == 1) baseValue -= (1 + (dayOfWeek % 2))
