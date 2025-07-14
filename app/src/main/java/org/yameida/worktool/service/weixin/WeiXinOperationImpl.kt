@@ -46,31 +46,6 @@ object WeiXinOperationImpl {
     private var signSuccess = ""
     private var otherSignSuccess = ""
 
-    val workDayLists = listOf(
-        "4-27",
-        "9-28",
-        "10-11"
-    )
-    val holidayLists = listOf(
-        "1-28",
-        "1-29",
-        "1-30",
-        "1-31",
-        "2-3",
-        "2-4",
-        "4-5",
-        "5-1",
-        "5-2",
-        "5-5",
-        "6-2",
-        "10-1",
-        "10-2",
-        "10-3",
-        "10-6",
-        "10-7",
-        "10-8"
-    )
-
 
     fun mainLoop() {
         while (true) {
@@ -295,14 +270,10 @@ object WeiXinOperationImpl {
         val dateDay = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val dateTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         var ruleId: String = ""
-        var longitude: String = ""
-        var latitude: String = ""
-        var address: String = ""
+        var random: MyAddress = MyAddress("", "", "")
         if (type == 1) {
             ruleId = "147"
-            longitude = "104.066444"
-            latitude = "30.769059"
-            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+            random = homeAddressLists.random()
         } else if (type == 2) {
             ruleId = "148"
             val local = LocalDate.now()
@@ -310,22 +281,16 @@ object WeiXinOperationImpl {
             val isWorkDay = workDayLists.contains("${local.month.value}-${local.dayOfMonth}")
             val dayOfWeek = local.dayOfWeek
             if (!isWorkDay && (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY || isHoliday)) {
-                longitude = "104.066444"
-                latitude = "30.769059"
-                address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+                random = homeAddressLists.random()
             } else {
-                longitude = "104.09778"
-                latitude = "30.653439"
-                address = "中国四川省成都市成华区一环路东三段2-8号玉双路(地铁站)"
+                random = workAddressLists.random()
             }
         } else if (type == 3) {
             ruleId = "149"
-            longitude = "104.066444"
-            latitude = "30.769059"
-            address = "中国四川省成都市新都区仁爱路152号欣茂·大峰景"
+            random = homeAddressLists.random()
         }
 
-        if (ruleId.isEmpty() || longitude.isEmpty() || latitude.isEmpty() || address.isEmpty()) return
+        if (ruleId.isEmpty() || random.longitude.isEmpty() || random.latitude.isEmpty() || random.address.isEmpty()) return
 
         postToSign(
             type,
@@ -333,9 +298,9 @@ object WeiXinOperationImpl {
             mapOf(
                 "reportDate" to dateDay.format(Date()),//2025/01/10
                 "reportTime" to dateTime.format(Date()),//"10:54:34
-                "longitude" to longitude,
-                "latitude" to latitude,
-                "address" to address,
+                "longitude" to random.longitude,
+                "latitude" to random.latitude,
+                "address" to random.address,
                 "orgId" to "49",
                 "jgbm" to "510114050001040004",
                 "personNum" to "5101142023040045",
