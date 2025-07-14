@@ -264,7 +264,7 @@ object WeiXinOperationImpl {
                         }
                     }
                 } else {
-                    sendMsg("@${name} 失败了 ${response.code}")
+                    sendMsg("@${name} 失败了 ${response.code}=${response.message}")
                     sleep(2000)
                     postToSignList()
                     println("Request failed with code: ${response.code}")

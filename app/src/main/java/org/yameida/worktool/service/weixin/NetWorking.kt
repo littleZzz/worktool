@@ -64,7 +64,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                callback(false, "getOtherToken-无地址")//回调
+                callback(false, "getOtherToken-${e.message}")//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -79,7 +79,7 @@ object NetWorking {
                         otherUploadPic(token, callback)
                     }
                 } else {
-                    callback(false, "getOtherToken-无地址")//回调
+                    callback(false, "getOtherToken-${response.code}=${response.message}")//回调
                     println("Request failed with code: ${response.code}")
                 }
             }
@@ -106,7 +106,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
-                callback(false, "otherUploadPic-无地址")//回调
+                callback(false, "otherUploadPic-${e.message}")//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -120,7 +120,7 @@ object NetWorking {
                         signOther(token, fileNane, callback)
                     }
                 } else {
-                    callback(false, "otherUploadPic-无地址")//回调
+                    callback(false, "otherUploadPic-${response.code}=${response.message}")//回调
                 }
             }
         })
@@ -168,7 +168,7 @@ object NetWorking {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 println("Request failed: ${e.message}")
-                callback(false, random.address.substring(random.address.length - 6))//回调
+                callback(false, "${e.message}")//回调
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -178,12 +178,13 @@ object NetWorking {
                         println("responseBody: $jsonObject")
                         val msg = jsonObject.get("msg").toString()
                         println("msg: $msg")
-                        callback(true, random.address.substring(random.address.length - 6))//回调
+                        val str = msg + random.address.substring(random.address.length - 6);
+                        callback(true, str)//回调
                         //保存
 //                        saveOther(token)
                     }
                 } else {
-                    callback(false, random.address.substring(random.address.length - 6))//回调
+                    callback(false, "${response.code}=" + response.message)//回调
                     println("Request failed with code: ${response.code}")
                 }
             }
@@ -239,8 +240,6 @@ object NetWorking {
 //        })
 
     }
-
-
 
 
     private var signRemoveDuplicate: String = ""//排重
