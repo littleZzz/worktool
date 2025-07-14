@@ -9,9 +9,6 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.yameida.worktool.Constant
-import org.yameida.worktool.service.WeworkController
-import org.yameida.worktool.service.getRoot
 import org.yameida.worktool.service.sleep
 import org.yameida.worktool.utils.*
 import java.io.IOException
@@ -34,7 +31,6 @@ object WeiXinOperationImpl {
     //token
     private val authorizationToken =
         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
-    private val roomName = "A同行"
     private val name = "Wisdom"
 
     //同分钟内进行排重
@@ -51,11 +47,6 @@ object WeiXinOperationImpl {
         while (true) {
             try {
                 sleep(10000)
-//                if (!isWeiXin()) {
-//                    goWeiXin()
-//                } else if (!isRoom()) {
-//                    goRoom()
-//                } else {
 
                 if ((LocalTime.now().minute) % 60 == 0 || istTest) {
                     sendMsg("")/*发送心跳间隔时间*/
@@ -75,80 +66,13 @@ object WeiXinOperationImpl {
                     toOtherSign(3)//另一个
                 }
 
-//                }
             } catch (_: Exception) {
             } finally {
             }
         }
     }
 
-    private fun isWeiXin(): Boolean {
-        while (true) {
-            val tempRoot = WeworkController.weworkService.rootInActiveWindow
-            val root = WeworkController.weworkService.rootInActiveWindow
-            if (tempRoot != root) {
-                LogUtils.e("tempRoot != root")
-            } else if (root != null) {
-                if (root.packageName == Constant.PACKAGE_NAMES) {
-                    return true
-                } else {
-                    LogUtils.e("当前微信: ${root.packageName}")
-                    return false
-                }
-            }
-            sleep(1000)
-        }
-    }
-
-    ///是否在指定房间
-    private fun isRoom(): Boolean {
-        return true
-//        while (true) {
-//            val tempRoot = WeworkController.weworkService.rootInActiveWindow
-//            val root = WeworkController.weworkService.rootInActiveWindow
-//            if (tempRoot != root) {
-//                LogUtils.e("tempRoot != root")
-//            } else if (root != null) {
-//                if (AccessibilityUtil.findOneByText(root, "$roomName(10)") != null) {
-//                    return true
-//                } else {
-//                    LogUtils.e("当前在指定room: ${root.packageName}")
-//                    return false
-//                }
-//            }
-//            sleep(1000)
-//        }
-    }
-
-    private fun goRoom() {
-        sleep(5000)
-        val result = AccessibilityUtil.findTextAndClick(getRoot(true), roomName)
-        LogUtils.e("进入指定room: $result")
-    }
-
-    private fun goWeiXin() {
-        AccessibilityUtil.globalGoHome(WeworkController.weworkService)
-        sleep(5000)
-        val result = AccessibilityUtil.findTextAndClick(getRoot(true), "微信")
-        if (!result) {
-            sleep(5000)
-            AccessibilityUtil.performXYClick(WeworkController.weworkService, 110f, 200f)
-        }
-        sleep(15000)
-
-        //判断可能出现的异常 ANR、权限申请弹窗
-        if (AccessibilityUtil.findOneByText(getRoot(), "微信没有响应") != null) {
-            AccessibilityUtil.findTextAndClick(getRoot(), "关闭应用")
-        } else if (AccessibilityUtil.findOneByText(
-                getRoot(), "权限申请"
-            ) != null && AccessibilityUtil.findOneByText(getRoot(), "去设置") != null
-        ) {
-            AccessibilityUtil.findTextAndClick(getRoot(), "取消")
-        }
-    }
-
     private fun sendMsg(txt: String) {
-        if (!isRoom()) return
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         if (txt.isEmpty()) {
@@ -163,32 +87,10 @@ object WeiXinOperationImpl {
                 ListViewManager.addItem(sdf.format(Date()) + isNotTimeRange.toString())
                 heartRemoveDuplicate = timeFlag
                 sleep(2000)
-
-//                val inputResult = AccessibilityUtil.findTextInput(
-//                    getRoot(), sdf.format(Date()) + isNotTimeRange.toString()
-//                )
-//                sleep(2000)
-//                val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
-//                if (result) {
-//                    heartRemoveDuplicate = timeFlag
-//                } else if (inputResult) {
-//                    AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
-//                    LogUtils.e("发送点击指定坐标: 650，1230")
-//                    heartRemoveDuplicate = timeFlag
-//                }
             }
         } else {
             ListViewManager.addItem(sdf.format(Date()) + "\n" + txt)
             sleep(2000)
-
-//            val inputResult =
-//                AccessibilityUtil.findTextInput(getRoot(), sdf.format(Date()) + "\n" + txt)
-//            sleep(2000)
-//            val result = AccessibilityUtil.findTextAndClick(getRoot(), "发送")
-//            if (!result && inputResult) {
-//                AccessibilityUtil.performXYClick(WeworkController.weworkService, 650f, 1230f)
-//                LogUtils.e("发送点击指定坐标: 650，1230")
-//            }
         }
     }
 
