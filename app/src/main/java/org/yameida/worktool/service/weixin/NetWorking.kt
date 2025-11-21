@@ -24,17 +24,17 @@ import java.time.LocalTime
 import java.util.Date
 import java.util.Locale
 
+//token  主app token值
+const val authorizationToken =
+    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiYjY4ZDA1YTNiY2E5NGNhZGJiNTlkMjUzYmJhNjhmZGIiLCJSb2xlIjoiMSIsIkp6cnliaCI6IjUxMDExNDIwMjMwNDAwNDUiLCJQdXNoSWQiOiJqei00OTgxIiwiU3VwcGxpZXIiOiI2IiwiZXhwIjoxODU4Mzk2NjE4LCJpc3MiOiJoYW5kb25nand0IiwiYXVkIjoiaGFuZG9uZ2p3dCJ9.2n3RYP4WtpJ24sQclu_Evn9SEvGoRAcEeCF0z8njSAA"
+
+//    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
 
 /**
  * 微信操作类
  */
 @SuppressLint("NewApi")
 object NetWorking {
-
-
-    //token
-    private val authorizationToken =
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiI0OTgxIiwiTmFtZSI6IueOi-aZuiIsIkpnYm0iOiI1MTAxMTQwNTAwMDEwNDAwMDQiLCJNYWNoaW5lIjoiZWNiMGQ5MWNkMWE3OWQwYSIsIlJvbGUiOiIxIiwiSnpyeWJoIjoiNTEwMTE0MjAyMzA0MDA0NSIsIlB1c2hJZCI6Imp6LTQ5ODEiLCJTdXBwbGllciI6IjYiLCJleHAiOjE3NzY0ODIxODgsImlzcyI6ImhhbmRvbmdqd3QiLCJhdWQiOiJoYW5kb25nand0In0.ZiuVjRKY7oozdYU5BzMnKFIV9CaS8I_wQIlOPl5jMKo"
 
 
     ///登录-上传图片-签到-save
@@ -48,7 +48,7 @@ object NetWorking {
         val formBodyBuilder = FormBody.Builder()
         mapOf(
             "password" to "7afa5b5d363ab40f",
-            "imei" to "b5cb2e2e1cd4c21a647f19d49522ed793b476c596ab156fe",
+            "imei" to "77c543c677bb9619c323251ea138b7eec0d3b460a0ce1121",
             "id" to "77781f9d7ef8583565a2f5e84cea9879c680af2511efdd8b",
             "type" to "1",
         ).forEach { (key, value) ->
