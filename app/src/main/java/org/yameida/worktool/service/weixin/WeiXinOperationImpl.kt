@@ -152,6 +152,7 @@ object WeiXinOperationImpl {
         else if (type == 3) baseValue -= (1 + (dayOfWeek % 3))
 
         if (isOther) baseValue += 2
+        baseValue += 10 //范围挪移到10-20+
 
         return currentMinute == baseValue || currentMinute == (30 + baseValue)
     }
