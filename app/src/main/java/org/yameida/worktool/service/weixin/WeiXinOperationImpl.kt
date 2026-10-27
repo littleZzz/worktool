@@ -143,6 +143,7 @@ object WeiXinOperationImpl {
     ///是否是此时段签到时间
     private fun isSignTime(type: Int, isOther: Boolean = false): Boolean {
         val calendar: Calendar = Calendar.getInstance()
+        val currentHour: Int = calendar.get(Calendar.HOUR_OF_DAY) // 获取当前小时（24小时制）
         val currentMinute: Int = calendar.get(Calendar.MINUTE) // 获取当前分钟
         val dayOfWeek: Int = calendar.get(Calendar.DAY_OF_MONTH) % 8 // 获取周几
 
@@ -154,7 +155,11 @@ object WeiXinOperationImpl {
         if (isOther) baseValue += 2
         baseValue += 10 //范围挪移到10-20+
 
-        return currentMinute == baseValue || currentMinute == (30 + baseValue)
+        if (currentHour == 8 || currentHour == 21) {
+            return currentMinute == (30 + baseValue)
+        } else {
+            return currentMinute == baseValue || currentMinute == (30 + baseValue)
+        }
     }
 
     fun toSign(type: Int) {
