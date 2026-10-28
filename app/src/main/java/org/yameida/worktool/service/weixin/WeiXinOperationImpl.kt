@@ -155,7 +155,7 @@ object WeiXinOperationImpl {
         if (isOther) baseValue += 2
         baseValue += 10 //范围挪移到10-20+
 
-        if (currentHour == 8 || currentHour == 21) {
+        if (currentHour == 8 || currentHour == 20) {
             return currentMinute == (30 + baseValue)
         } else {
             return currentMinute == baseValue || currentMinute == (30 + baseValue)
